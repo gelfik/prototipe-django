@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Управление вопросами{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item"><a href="/adm/archive"><i class="far fa-star mr-2 white-text"
+                                                                      aria-hidden="true"></i>Архив</a></li>
+                {% if arguments.test.test_id.id %}
+                    <li class="breadcrumb-item"><a href="/adm/archive/{{ arguments.test.test_id.id }}"><i
+                            class="far fa-star mr-2 white-text"
+                            aria-hidden="true"></i>{{ arguments.test.test_id.predmet_id.predmet_name_sokr }} {{ arguments.test.test_id.test_name }}
+                    </a></li>
+                {% endif %}
+                {% if arguments.test.test_id.id %}
+                    <li class="breadcrumb-item"><i
+                            class="far fa-star mr-2 white-text"
+                            aria-hidden="true"></i>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}
+                    </li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Администратор" or user|has_group:"Преподаватель" %}
+            {% if arguments.error %}
+                <div class="alert alert-danger my_border">
+                    {{ arguments.error }}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if arguments.test and arguments.test_voprosi|cheak_count_list %}
+            <div class="alert alert-primary my_border" role="alert">
+                Предмет: <b>{{ arguments.test.test_id.predmet_id.predmet_name }}</b><br>
+                Тема теста: <b>{{ arguments.test.test_id.test_name }}</b>
+                <hr>
+                Начало решения теста: <b>{{ arguments.test.start_time }}</b><br>
+                {% if arguments.test.end_status %}
+                    Окончание решения теста: <b>{{ arguments.test.end_time }}</b><br>
+                    <hr>
+                    Тест сдал:
+                    <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
+                    <br>
+                    Оценка: <b>{{ arguments.test.ocenka }}%</b><br>
+                {% else %}
+                    Тест сдает:
+                    <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
+                    <br>
+                {% endif %}
+                {% if arguments.test.override_status %}
+                    <hr>
+                    <span style="font-weight: bold; color: red">НЕ ЗАСЧИТАН, ОТПРАВЛЕН НА ПЕРЕСДАЧУ!</span>
+                {% else %}
+                    <hr>
+                    <span style="font-weight: bold; color: forestgreen">ЗАСЧИТАН</span>
+                {% endif %}
+            </div>
+
+            {% if not arguments.test.override_status %}
+                <form>
+                    {% csrf_token %}
+                    <button type="submit" formmethod="post" class="btn btn-danger btn-block my_border" role="button">
+                        Отправить на пересдачу
+                    </button>
+                </form>
+            {% endif %}
+
+            <div class="accordion" id="accordionASK">
+                {% for vopros in arguments.test_voprosi %}
+                    <div class="card  my_border">
+                        <div class="card-header" id="heading_ask_{{ forloop.counter }}">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                        data-target="#collapse_ask_{{ forloop.counter }}" aria-expanded="false"
+                                        aria-controls="collapse_ask_{{ forloop.counter }}">
+                                    Вопрос №{{ forloop.counter }}
+                                    {% if vopros.otvet_status %} <span style="color: forestgreen">Верно</span>
+                                    {% else %} <span style="color: orangered">Не верно</span>
+                                    {% endif %}
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse_ask_{{ forloop.counter }}" class="collapse"
+                             aria-labelledby="heading_ask_{{ forloop.counter }}"
+                             data-parent="#accordionASK">
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <h5>{{ vopros.voprosi_id.vopros }}</h5>
+                                    <h6>Ответ: <b></b>{{ vopros.otvet_user }}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Вопросы не найдены!
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

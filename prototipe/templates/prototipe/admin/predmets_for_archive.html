@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Архив - Предметы{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                {% if arguments.tests %}
+                    <li class="breadcrumb-item"><i class="far fa-star mr-2 white-text" aria-hidden="true"></i>Архив</li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Администратор" or user|has_group:"Преподаватель" %}
+            {% if arguments.error %}
+                <div class="alert alert-danger my_border">
+                    {{ arguments.error }}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if arguments.tests %}
+            <div class="my_border" style="background: white">
+                <table class="table table-sm table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Предмет</th>
+                        <th scope="col">Тест</th>
+                        <th scope="col">Дата действия</th>
+                        <th scope="col">Статус публикации</th>
+                        {% if user|has_group:"Администратор" %}
+                            <th scope="col">Создатель</th>{% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for test in arguments.tests %}
+                        <tr onclick="window.location.href = '/adm/archive/{{ test.id }}'">
+                            <th scope="row" data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.predmet_id.predmet_name_sokr }}</th>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.test_name }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.valid_date }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">
+                                {% if test.active_status %}
+                                    <span style="font-weight: bold; color: forestgreen">Опубликован</span>
+                                {% else %}
+                                    <span style="color: red">Создание</span>
+                                {% endif %}
+                            </td>
+                            {% if user|has_group:"Администратор" %}
+                                <td data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра">{{ test.create_user_id }}</td>{% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Вы еще не создавали тесты!
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+

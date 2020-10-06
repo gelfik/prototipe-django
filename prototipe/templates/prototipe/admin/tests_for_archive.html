@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Архив - Тесты{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item"><a href="/adm/archive"><i class="far fa-star mr-2 white-text"
+                                                                      aria-hidden="true"></i>Архив</a></li>
+                {% if arguments.test.test_name %}
+                    <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text"
+                                                          aria-hidden="true"></i><b>{{ arguments.test.predmet_id.predmet_name_sokr }}</b> {{ arguments.test.test_name }}
+                    </li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Администратор" or user|has_group:"Преподаватель" %}
+            {% if arguments.error %}
+                <div class="alert alert-danger my_border">
+                    {{ arguments.error }}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if arguments.test %}
+            <div class="container my_border" style="background: white">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4>{{ arguments.test.test_name }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h5>Предмет: <b>{{ arguments.test.predmet_id.predmet_name }}</b></h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Тест действителен до: <b>{{ arguments.test.valid_date }}</b></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Тест создал:
+                            <b>{{ arguments.test.create_user_id.last_name }} {{ arguments.test.create_user_id.first_name }} {{ arguments.test.create_user_id.userprofile.patronymic }}</b>
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Выборка из <b>{{ arguments.test.voprosi_count }}шт. </b>вопросов</span>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Тест не найден или его создали не вы!
+            </div>
+        {% endif %}
+
+        {% if arguments.tests %}
+            <div class="my_border" style="background: white">
+                <table class="table table-sm table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">ФИО сдававшего</th>
+                        <th scope="col">Начало решения</th>
+                        <th scope="col">Завершение решения</th>
+                        <th scope="col">Оценка</th>
+                        <th scope="col">Статус завершения</th>
+                        <th scope="col">Статус пересдачи</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for test in arguments.tests %}
+                        <tr onclick="window.location.href = '/adm/archive/{{ test.test_id.id }}/{{ test.id }}'">
+                            <th data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">
+                                {% if test.override_status %}
+                                    <span>{{ test.user_id.last_name }} {{ test.user_id.first_name }} {{ test.user_id.userprofile.patronymic }}</span>
+                                {% else %}
+                                    <span style="color: forestgreen; font-weight: bold">{{ test.user_id.last_name }} {{ test.user_id.first_name }} {{ test.user_id.userprofile.patronymic }}</span>
+                                {% endif %}
+                            </th>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">
+                                {% if test.override_status %}
+                                    <span>{{ test.start_time }}</span>
+                                {% else %}
+                                    <span style="color: forestgreen; font-weight: bold">{{ test.start_time }}</span>
+                                {% endif %}
+                            </td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">
+                                {% if test.end_status %}
+                                    {% if test.override_status %}
+                                        <span>{{ test.end_time }}</span>
+                                    {% else %}
+                                        <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    В процессе решения
+                                {% endif %}
+                            </td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">
+                                {% if test.override_status %}
+                                    <span>{{ test.ocenka }}%</span>
+                                {% else %}
+                                    <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
+                                {% endif %}
+                            </td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">
+                                {% if test.end_status %}
+                                    {% if test.override_status %}
+                                        <span>Сдан</span>
+                                    {% else %}
+                                        <span style="color: forestgreen; font-weight: bold">Сдан</span>
+                                    {% endif %}
+                                {% else %}
+                                    В процессе решения
+                                {% endif %}
+                            </td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">
+                                {% if test.override_status %}
+                                    <span style="color: red">Пересдача</span>
+                                {% else %}
+                                    <span style="color: forestgreen; font-weight: bold">Засчитан</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                {% if not arguments.test.active_status %}
+                    Тест не опубликован, возможно в нем нет вопросов! <a href="/adm/tests/{{ arguments.test.id }}">Добавить</a>
+                {% else %}
+                    Ответы на тест не найдены!
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+

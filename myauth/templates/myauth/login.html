@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Авторизация{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="modal-body">
+            <form action="/user/auth/login/" method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <label for="username">Логин</label>
+                    <input type="username" class="form-control" id="username" name="username" required>
+                </div>
+                <div class="form-row">
+                    <label for="password">Пароль</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+
+                {% if arguments.login_error %}
+                    <div class="form-row" style="color: red;">
+                        Ошибка: {{ arguments.login_error }}
+                    </div>
+                {% endif %}
+
+                <div class="form-row align-items-center mt-3 justify-content-center mobile-auth">
+                    <button class="btn btn-dark" type="submit">Войти</button>
+                    <span class="m-2">или</span>
+                    <button class="btn btn-dark" type="button" onclick="window.location= '/user/auth/register/';">Создать
+                        аккаунт
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

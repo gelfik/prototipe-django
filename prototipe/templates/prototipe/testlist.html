@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Тесты{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item"><a href="/tests"><i class="far fa-star mr-2 white-text" aria-hidden="true"></i>Предметы</a></li>
+                {% if arguments.predmet %}
+                <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text"
+                                                      aria-hidden="true"></i>{{ arguments.predmet }}</li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        {% if arguments.tests|cheak_count_list %}
+            <table class="table" style="background: white">
+                <thead class="thead-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Тема теста</th>
+                    <th scope="col">Решить до</th>
+                    <th scope="col">Действие</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for test in arguments.tests %}
+                    <tr>
+                        <th scope="row">{{ test.id }}</th>
+                        <td>{{ test.test_name }}</td>
+                        <td>{{ test.valid_date }}</td>
+                        <td>
+                            <button type="button" class="btn btn-secondary"
+                                    onclick="window.location= '/tests/{{ arguments.predmet.predmet_name_sokr_translite }}/{{ test.id }}';">Открыть
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Нет доступных тестов!
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

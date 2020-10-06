@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Управление вопросами{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item"><a href="/adm/tests"><i class="far fa-star mr-2 white-text"
+                                                                aria-hidden="true"></i>Тесты</a></li>
+                {% if arguments.test.test_name %}
+                    <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text" aria-hidden="true"></i><b>{{ arguments.test.predmet_id.predmet_name_sokr }}</b> {{ arguments.test.test_name }}</li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Администратор" or user|has_group:"Преподаватель" %}
+            {% if arguments.error %}
+                <div class="alert alert-danger my_border">
+                    {{ arguments.error }}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if arguments.test %}
+            <div class="container my_border" style="background: white">
+                <div class="row align-items-center">
+                    <div class="col-10">
+                        <h4>{{ arguments.test.test_name }}</h4>
+                    </div>
+                    <div class="col-2 align-self-center">
+                        {% if arguments.test.active_status %}
+                            <h4 style="color: forestgreen">Опубликован</h4>
+                        {% else %}
+                            <h4 class="font-weight-bold" style="color: red">Создание</h4>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h5>Предмет: <b>{{ arguments.test.predmet_id.predmet_name }}</b></h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Тест действителен до: <b>{{ arguments.test.valid_date }}</b></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Тест создал:
+                            <b>{{ arguments.test.create_user_id.last_name }} {{ arguments.test.create_user_id.first_name }} {{ arguments.test.create_user_id.userprofile.patronymic }}</b>
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Выборка из <b>{{ arguments.test.voprosi_count }}шт. </b>вопросов</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if not arguments.test.active_status %}
+                <div class="row">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-danger btn-block my_border" role="button" data-toggle="modal"
+                                data-target="#DelTestModal">
+                            Удалить тест
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" class="btn btn-danger btn-block my_border" role="button" data-toggle="modal"
+                                data-target="#PublicTestModal">
+                            Опубликовать
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6">
+                        <button type="button" class="btn btn-dark btn-block my_border" role="button" data-toggle="modal"
+                                data-target="#AddModal">
+                            Добавить вопрос
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button type="button" class="btn btn-dark btn-block my_border" role="button" data-toggle="modal"
+                                data-target="#EditTestModal">
+                            Изменить данные теста
+                        </button>
+                    </div>
+                </div>
+            {% elif arguments.test.active_status %}
+                <div class="row">
+                    <div class="col">
+                        <button type="button" class="btn btn-danger btn-block my_border" role="button" data-toggle="modal"
+                                data-target="#DelTestModal">
+                            Удалить тест
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if arguments.voprosi|cheak_count_list > 0 %}
+                <div class="my_border" style="background: white">
+                    <table class="table table-sm table-hover">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Вопрос</th>
+                            <th scope="col">Ответ</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for vopros in arguments.voprosi %}
+                            {% if not arguments.test.active_status %}
+                                <tr role="button" data-toggle="modal" data-target="#EditModal_{{ vopros.id }}">
+                                    <th scope="row" data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для редактирования">{{ vopros.vopros }}</th>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для редактирования">{{ vopros.otvet }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <th scope="row">{{ vopros.vopros }}</th>
+                                    <td>{{ vopros.otvet }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-danger my_border">
+                    <p class="text">Вопросы еще не добавлены в тест!</p>
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {% if not arguments.test.active_status %}
+        <!-- Add Modal -->
+        <div class="modal fade" id="AddModal" tabindex="-1" role="dialog" aria-labelledby="AddModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="AddModalLabel">Добавление нового вопроса в тест</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="post" action="/adm/tests/{{ arguments.test.id }}/addVopros">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="new_vopros">Вопрос</label>
+                                <input type="text" class="form-control" id="new_vopros" name="new_vopros"
+                                       placeholder="Вопрос">
+                            </div>
+                            <div class="form-group">
+                                <label for="new_otvet">Ответ</label>
+                                <input type="text" class="form-control" id="new_otvet" name="new_otvet"
+                                       placeholder="Ответ">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Добавить</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div class="modal fade" id="EditTestModal" tabindex="-1" role="dialog"
+             aria-labelledby="EditTestModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="EditTestModalLabel">Изменение данных теста</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="post" action="/adm/tests/{{ arguments.test.id }}/editTest">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="test_name">Тема теста</label>
+                                <input type="text" class="form-control" id="test_name" name="test_name"
+                                       value="{{ arguments.test.test_name }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="valid_date">Дата действия</label>
+                                <input type="date" class="form-control" id="valid_date" name="valid_date"
+                                       value="{{ arguments.test.valid_date|data_for_input }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="vopros_count">Число вопросов</label>
+                                <input type="number" class="form-control" id="vopros_count" name="vopros_count"
+                                       value="{{ arguments.test.voprosi_count }}">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Изменить</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
+    {% if arguments.voprosi and not arguments.test.active_status %}
+        {% for vopros in arguments.voprosi %}
+            <!-- Add Vopros Modal {{ vopros.id }} -->
+            <div class="modal fade" id="EditModal_{{ vopros.id }}" tabindex="-1" role="dialog"
+                 aria-labelledby="EditModalLabel_{{ vopros.id }}"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="EditModalLabel_{{ vopros.id }}">Редактирование вопроса</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form action="/adm/tests/{{ arguments.test.id }}/editVopros">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="vopros_{{ vopros.id }}">Вопрос</label>
+                                    <input type="text" class="form-control" id="vopros_{{ vopros.id }}"
+                                           name="vopros_{{ vopros.id }}"
+                                           placeholder="Вопрос" value="{{ vopros.vopros }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="otvet_{{ vopros.id }}">Ответ</label>
+                                    <input type="text" class="form-control" id="otvet_{{ vopros.id }}"
+                                           name="otvet_{{ vopros.id }}"
+                                           placeholder="Ответ"
+                                           value="{{ vopros.otvet }}">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button formmethod="get" type="submit" class="btn btn-danger">Удалить</button>
+                                <button formmethod="post" type="submit" class="btn btn-primary">Сохранить</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if arguments.test %}
+        <!-- Del Test Modal -->
+        <div class="modal fade" id="DelTestModal" tabindex="-1" role="dialog"
+             aria-labelledby="DelTestModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="DelTestModalLabel">Удаление теста</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="post" action="/adm/tests/{{ arguments.test.id }}/delTest" id="delForm">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <p class="test">Если вы удалите тест, то его нельзя будет восстановить, так же данный
+                                    тест пропадет у пользователей, решивших его вместе с результатами!</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger">Удалить</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Public Test Modal -->
+        <div class="modal fade" id="PublicTestModal" tabindex="-1" role="dialog"
+             aria-labelledby="PublicTestModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="PublicTestModalLabel">Удаление теста</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form method="post" action="/adm/tests/{{ arguments.test.id }}/publicTest" id="delForm">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <p class="test">Если вы опубликуете тест, в него уже нельзя будет вносить изменения и правки!<br><br>
+                                    Еще раз проверьте тест перед публикацией!</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-danger">Опубликовать</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

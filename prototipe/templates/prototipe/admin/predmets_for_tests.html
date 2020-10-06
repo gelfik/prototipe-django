@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Управление вопросами{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                {% if arguments.tests %}
+                    <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text"
+                                                          aria-hidden="true"></i>Тесты
+                    </li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Администратор" or user|has_group:"Преподаватель" %}
+            <button type="button" class="btn btn-dark btn-block my_border" role="button" data-toggle="modal"
+                    data-target="#AddModal">
+                Добавить тест
+            </button>
+
+            {% if arguments.error %}
+                <div class="alert alert-danger my_border">
+                    {{ arguments.error }}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if arguments.tests %}
+            <div class="my_border" style="background: white">
+                <table class="table table-sm table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Предмет</th>
+                        <th scope="col">Тест</th>
+                        <th scope="col">Дата действия</th>
+                        <th scope="col">Вопросов</th>
+                        <th scope="col">Статус публикации</th>
+                        {% if user|has_group:"Администратор" %}
+                            <th scope="col">Создатель</th>{% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for test in arguments.tests %}
+                        <tr onclick="window.location.href = '/adm/tests/{{ test.id }}'">
+                            <th scope="row" data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.predmet_id.predmet_name_sokr }}</th>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.test_name }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.valid_date }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.voprosi_count }}</td>
+                            {% if test.active_status %}
+                                <td style="color: forestgreen" data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра">Опубликован
+                                </td> {% else %}
+                                <td style="color: red" data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра">Создание
+                                </td> {% endif %}
+                            {% if user|has_group:"Администратор" %}
+                                <td data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра">{{ test.create_user_id }}</td>{% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Вы еще не создавали тесты!
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal fade" id="AddModal" tabindex="-1" role="dialog" aria-labelledby="AddModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="AddModalLabel">Добавление нового теста</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="predmet_id">Предмет</label>
+                            <select id="predmet_id" class="form-control" name="predmet_id">
+                                {% for predmet in arguments.predmets %}
+                                    <option value="{{ predmet.id }}">{{ predmet.predmet_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="test_name">Название теста</label>
+                            <input type="text" class="form-control" id="test_name" name="test_name"
+                                   placeholder="Название теста">
+                        </div>
+                        <div class="form-group">
+                            <label for="valid_date">Дата действия теста</label>
+                            <input type="date" class="form-control" id="valid_date" name="valid_date">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+

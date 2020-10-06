@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Тесты{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item"><a href="/tests"><i class="far fa-star mr-2 white-text"
+                                                                aria-hidden="true"></i>Предметы</a></li>
+                {% if arguments.predmet %}
+                    <li class="breadcrumb-item"><a href="/tests/{{ arguments.predmet.predmet_name_sokr_translite }}"><i
+                            class="far fa-star mr-2 white-text" aria-hidden="true"></i>{{ arguments.predmet }}</a></li>
+                {% endif %}
+            </ol>
+        </nav>
+    
+        {% if arguments.test_for_user and arguments.test and arguments.test_voprosi|cheak_count_list %}
+            <div class="alert alert-primary" role="alert">
+                <p>Тема теста: <b>{{ arguments.test.test_name }}</b></p>
+                <hr>
+                <p>Начало решения теста: <b>{{ arguments.test_for_user.start_time }}</b></p>
+                {% if arguments.test_for_user.end_status %}
+                    <p>Окончание решения теста: <b>{{ arguments.test_for_user.end_time }}</b></p>
+                    <hr>
+                    <p>Ваша оценка: <b>{{ arguments.test_for_user.ocenka }}%</b></p>
+                {% endif %}
+            </div>
+            {% if arguments.error_message %}
+                <div class="alert alert-danger" role="alert">
+                    <p>Ошибка: <b>{{ arguments.error_message }}</b></p>
+                </div>
+            {% endif %}
+            {% if not arguments.test_for_user.end_status %}
+                <form method="post">
+                    <div class="accordion" id="accordionASK">
+                        {% csrf_token %}
+                        {% for vopros in arguments.test_voprosi %}
+                            <div class="card  my_border">
+                                <div class="card-header" id="heading_ask_{{ forloop.counter }}">
+                                    <h5 class="mb-0">
+                                        <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                                data-target="#collapse_ask_{{ forloop.counter }}" aria-expanded="false"
+                                                aria-controls="collapse_ask_{{ forloop.counter }}">
+                                            Вопрос №{{ forloop.counter }}
+                                        </button>
+                                    </h5>
+                                </div>
+                                <div id="collapse_ask_{{ forloop.counter }}" class="collapse"
+                                     aria-labelledby="heading_ask_{{ forloop.counter }}"
+                                     data-parent="#accordionASK">
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <h5>{{ vopros.voprosi_id.vopros }}</h5>
+                                            <input type="text" class="form-control"
+                                                   id="inputAsk_{{ vopros.voprose_num }}"
+                                                   placeholder="Ответ"
+                                                   name="ask_{{ vopros.voprose_num }}"
+                                                   {% if vopros.otvet_user %}value="{{ vopros.otvet_user }}"{% endif %}>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-secondary btn-icon">
+                            <span class="icon"><i class="fas fa-check"></i></span>Отправить на проверку
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div class="accordion" id="accordionASK">
+                    {% for vopros in arguments.test_voprosi %}
+                        <div class="card  my_border">
+                            <div class="card-header" id="heading_ask_{{ forloop.counter }}">
+                                <h5 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                            data-target="#collapse_ask_{{ forloop.counter }}" aria-expanded="false"
+                                            aria-controls="collapse_ask_{{ forloop.counter }}">
+                                        Вопрос №{{ forloop.counter }}
+                                        {% if vopros.otvet_status %} <span style="color: forestgreen">Верно</span>
+                                        {% else %} <span style="color: orangered">Не верно</span>
+                                        {% endif %}
+                                    </button>
+                                </h5>
+                            </div>
+                            <div id="collapse_ask_{{ forloop.counter }}" class="collapse"
+                                 aria-labelledby="heading_ask_{{ forloop.counter }}"
+                                 data-parent="#accordionASK">
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <h5>{{ vopros.voprosi_id.vopros }}</h5>
+                                        <h6>Ваш ответ: <b></b>{{ vopros.otvet_user }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Тест не найден или завершен!
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

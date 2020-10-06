@@ -1,0 +1,39 @@
+/* CSS */
+.btn-icon {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.btn > .icon {
+    position: relative;
+    left: -.75rem;
+    display: inline-block;
+    padding: .375rem .75rem;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: .25rem 0 0 .25rem;
+}
+
+.breadcrumb {
+    margin-top: 20px;
+    background-color: #ffffff;
+    font-size: 18px;
+    border-radius: 15px 15px 15px 15px;
+}
+
+.breadcrumb > .breadcrumb-item > a {
+    color: #000000;
+    font-weight: bold;
+}
+
+.breadcrumb > .breadcrumb-item.active {
+    color: #2a2a2a;
+}
+
+.my_border {
+    .border;
+    .shadow;
+    border-radius: 20px 20px 20px 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-color: #cecfd3;
+}

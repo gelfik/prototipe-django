@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Управление - Пользователи{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text"
+                                                      aria-hidden="true"></i>Пользователи
+                </li>
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Администратор" and arguments.error %}
+            <div class="alert alert-danger my_border">
+                {{ arguments.error }}
+            </div>
+        {% endif %}
+
+        {% if arguments.users|cheak_count_list > 0 %}
+            <div class="my_border" style="background: white">
+                <table class="table table-sm table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Номер</th>
+                        <th scope="col">Логин</th>
+                        <th scope="col">Фамилия</th>
+                        <th scope="col">Имя</th>
+                        <th scope="col">Отчество</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for usr in arguments.users %}
+                        <tr role="button" onclick="window.location.href = '/adm/users/{{ usr.id }}'">
+                            <th scope="row" data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для редактирования">{{ usr.id }}</th>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для редактирования">{{ usr.username }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для редактирования">{{ usr.last_name }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для редактирования">{{ usr.first_name }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для редактирования">{{ usr.userprofile.patronymic }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                <p class="text">Пользователи не найдены!</p>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

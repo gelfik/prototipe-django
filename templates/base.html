@@ -1,0 +1,91 @@
+<!doctype html>
+{% load static %}
+{% load tags_jinja %}
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta charset="utf-8">
+    <meta name="theme-color" content="#e8eaec">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="shortcut icon" type="image/png" href="{% static "favicon.ico" %}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"/>
+    <link rel="stylesheet" href="{% static 'css\fontawesome\all.min.css' %}"/>
+</head>
+<body style="background-color:#e8eaec">
+<div class="bg-dark header d-print-none" style="z-index: 10000" id="navbar">
+    <nav class="container navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">Прототипы</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent" style="justify-content: flex-end;">
+            <ul class="nav bg-dark">
+                {% if user.is_authenticated %}
+                    {% if user|has_group:"Преподаватель" or user|has_group:"Администратор" %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" style="color:white" data-toggle="dropdown" role="button"
+                               aria-haspopup="true"
+                               aria-expanded="false">Управление</a>
+                            <div class="dropdown-menu">
+                                {% if user|has_group:"Администратор" %}
+                                    <a class="dropdown-item" href="/adm/predmets">Предметы</a>
+                                    <div class="dropdown-divider"></div>
+                                {% endif %}
+                                <a class="dropdown-item" href="/adm/tests">Тесты</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="/adm/archive">Архив</a>
+                                {% if user|has_group:"Администратор" %}
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="/adm/users">Пользователи</a>
+                                {% endif %}
+                            </div>
+                        </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/tests">Тесты</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" style="color:white" data-toggle="dropdown" role="button"
+                           aria-haspopup="true"
+                           aria-expanded="false">{{ user }}</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="/user/profile">Профиль</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/user/auth/logout/">Выйти</a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" style="color:white" data-toggle="dropdown" role="button"
+                           aria-haspopup="true"
+                           aria-expanded="false">Авторизация</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item active" href="/user/auth/login/">Войти</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/user/auth/register/">Регистрация</a>
+                        </div>
+                    </li>
+                {% endif %}
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+{% block content %}{% endblock %}
+
+{{ STATIC_URL }}
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
+<script src="{% static 'js/js.js' %}"></script>
+</body>
+</html>
