@@ -32,30 +32,78 @@
         {% endif %}
 
         {% if arguments.test and arguments.test_voprosi|cheak_count_list %}
-            <div class="alert alert-primary my_border" role="alert">
-                Предмет: <b>{{ arguments.test.test_id.predmet_id.predmet_name }}</b><br>
-                Тема теста: <b>{{ arguments.test.test_id.test_name }}</b>
-                <hr>
-                Начало решения теста: <b>{{ arguments.test.start_time }}</b><br>
-                {% if arguments.test.end_status %}
-                    Окончание решения теста: <b>{{ arguments.test.end_time }}</b><br>
-                    <hr>
-                    Тест сдал:
-                    <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
-                    <br>
-                    Оценка: <b>{{ arguments.test.ocenka }}%</b><br>
-                {% else %}
-                    Тест сдает:
-                    <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
-                    <br>
-                {% endif %}
-                {% if arguments.test.override_status %}
-                    <hr>
-                    <span style="font-weight: bold; color: red">НЕ ЗАСЧИТАН, ОТПРАВЛЕН НА ПЕРЕСДАЧУ!</span>
-                {% else %}
-                    <hr>
-                    <span style="font-weight: bold; color: forestgreen">ЗАСЧИТАН</span>
-                {% endif %}
+            <div class="my_border">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="alert alert-primary" role="alert">
+                            Предмет: <b>{{ arguments.test.test_id.predmet_id.predmet_name }}</b><br>
+                            Тема теста: <b>{{ arguments.test.test_id.test_name }}</b>
+                            <hr>
+                            Начало решения теста: <b>{{ arguments.test.start_time }}</b><br>
+                            {% if arguments.test.end_status %}
+                                Окончание решения теста: <b>{{ arguments.test.end_time }}</b><br>
+                                <hr>
+                                Тест сдал:
+                                <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
+                                <br>
+                                Оценка: <b>{{ arguments.test.ocenka }}%</b><br>
+                            {% else %}
+                                Тест сдает:
+                                <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
+                                <br>
+                            {% endif %}
+                            {% if arguments.test.override_status %}
+                                <hr>
+                                <span style="font-weight: bold; color: red">НЕ ЗАСЧИТАН, ОТПРАВЛЕН НА ПЕРЕСДАЧУ!</span>
+                            {% else %}
+                                <hr>
+                                <span style="font-weight: bold; color: forestgreen">ЗАСЧИТАН</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <canvas id="marksChart" width="600" height="400"></canvas>
+                        <script>
+                            var marksCanvas = document.getElementById("marksChart");
+
+                            let labels = []
+                            let data = []
+
+                            {% for vopros in arguments.test_voprosi %}
+                                labels.push('{{ vopros.voprosi_id.vopros }}')
+                                {% if vopros.otvet_status %}
+                                    data.push(1)
+                                {% else %}
+                                    data.push(0)
+                                {% endif %}
+                            {% endfor %}
+                            var marksData = {
+                                labels: labels,
+                                datasets: [{
+                                    label: "Ответы",
+                                    backgroundColor: "rgba(200,0,0,0.2)",
+                                    data: data
+                                }]
+                            };
+
+                            var radarChart = new Chart(marksCanvas, {
+                                type: 'radar',
+                                data: marksData,
+                                options: {
+                                    scale: {
+                                        display: true,
+                                        ticks: {
+                                            beginAtZero: true,
+                                            max: 1,
+                                            min: 0,
+                                            stepSize: 1
+                                        }
+                                    }
+                                }
+                            });
+                        </script>
+                    </div>
+                </div>
             </div>
 
             {% if not arguments.test.override_status %}

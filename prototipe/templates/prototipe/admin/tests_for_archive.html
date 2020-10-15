@@ -60,7 +60,21 @@
             </div>
         {% endif %}
 
+
         {% if arguments.tests %}
+
+            <div class="my_border" style="background: white">
+                <div class="row">
+                    <div class="col-6">
+                        <canvas id="marksChart_Sdan" width="100" height="25"></canvas>
+                    </div>
+                    <div class="col-6">
+                        <canvas id="marksChart" width="100" height="25"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
             <div class="my_border" style="background: white">
                 <table class="table table-sm table-hover">
                     <thead class="thead-dark">
@@ -141,12 +155,82 @@
         {% else %}
             <div class="alert alert-danger my_border">
                 {% if not arguments.test.active_status %}
-                    Тест не опубликован, возможно в нем нет вопросов! <a href="/adm/tests/{{ arguments.test.id }}">Добавить</a>
+                    Тест не опубликован, возможно в нем нет вопросов!
+                    <a href="/adm/tests/{{ arguments.test.id }}">Добавить</a>
                 {% else %}
                     Ответы на тест не найдены!
                 {% endif %}
             </div>
         {% endif %}
+
+        <script>
+            window.onload = function () {
+                var marksCanvas = document.getElementById("marksChart");
+                var labels = []
+                var data = []
+                {% for test in arguments.tests %}
+                    {% if test.override_status %}
+                        labels.push('{{ test.user_id.last_name }} {{ test.user_id.first_name }}')
+                        data.push({{ test.ocenka }})
+                    {% endif %}
+                {% endfor %}
+
+                var stackedBar = new Chart(marksCanvas, {
+                    type: 'bar',
+                    data: {
+                        datasets: [{
+                            label: 'Пересдача',
+                            data: data,
+                            backgroundColor: "rgba(200,0,0,0.2)"
+                        }],
+                        labels: labels
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true
+                            }],
+                            yAxes: [{
+                                stacked: true
+                            }]
+                        }
+                    }
+                });
+
+                var marksCanvas_Sdan = document.getElementById("marksChart_Sdan");
+                var labels_Sdan = []
+                var data_Sdan = []
+                {% for test in arguments.tests %}
+                    {% if not test.override_status %}
+                        labels_Sdan.push('{{ test.user_id.last_name }} {{ test.user_id.first_name }}')
+                        data_Sdan.push({{ test.ocenka }})
+                    {% endif %}
+                {% endfor %}
+
+                var stackedBar_Sdan = new Chart(marksCanvas_Sdan, {
+                    type: 'bar',
+                    data: {
+                        datasets: [{
+                            label: 'Засчитанные',
+                            data: data_Sdan,
+                            backgroundColor: "rgba(0,255,0,0.2)"
+                        }],
+                        labels: labels_Sdan
+                    },
+                    options: {
+                        scales: {
+                            xAxes: [{
+                                stacked: true
+                            }],
+                            yAxes: [{
+                                stacked: true
+                            }]
+                        }
+                    }
+                });
+            }
+        </script>
     </div>
+
 {% endblock %}
 
