@@ -23,102 +23,157 @@
             </div>
         {% endif %}
 
-        {% if user|has_group:"Администратор" and arguments.user %}
+        {% if arguments.user %}
             <div class="container">
                 <div class="row">
-                    <div class="col-8 my_border" style="background: white">
-                        <div class="row">
-                            <div class="col">
-                                <span>Табельный номер: <b>{{ arguments.user.id }}</b></span><br><br>
-                                <span>Фамилия: <b>{{ arguments.user.last_name }}</b></span><br>
-                                <span>Имя: <b>{{ arguments.user.first_name }}</b></span><br>
-                                <span>Отчество: <b>{{ arguments.user.userprofile.patronymic }}</b></span><br><br>
-                                <span> Роль:
+                    {% if user|has_group:"Администратор" %}
+                        <div class="col-8 my_border" style="background: white">
+                            <div class="row">
+                                <div class="col">
+                                    <span>Табельный номер: <b>{{ arguments.user.id }}</b></span><br><br>
+                                    <span>Фамилия: <b>{{ arguments.user.last_name }}</b></span><br>
+                                    <span>Имя: <b>{{ arguments.user.first_name }}</b></span><br>
+                                    <span>Отчество: <b>{{ arguments.user.userprofile.patronymic }}</b></span><br><br>
+                                    <span> Роль:
                                     <b>
                                     {% for item in arguments.user.groups.all %}
                                         {{ item.name }}
                                     {% endfor %}
                                     </b>
                                 </span><br><br>
-                                <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
-                                <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
-                                {% if user.is_superuser or user.is_staff %}
-                                    <span>Пароль: <b>{{ arguments.user.userprofile.password }}</b></span><br><br>
-                                {% endif %}
+                                    <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
+                                    <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
+                                    {% if user.is_superuser or user.is_staff %}
+                                        <span>Пароль: <b>{{ arguments.user.userprofile.password }}</b></span><br><br>
+                                    {% endif %}
+                                    <span>Админ панель: <b>{% if arguments.user.is_staff %}Имеет{% else %}Не
+                                        имеет{% endif %}</b></span><br>
+                                    <span>Суперпользователь: <b>{% if arguments.user.is_superuser %}Да{% else %}
+                                        Нет{% endif %}</b></span><br><br>
+                                    <span>Дата регистрации: <b>{{ arguments.user.date_joined }}</b></span><br>
+                                    <span>Последняя авторизация: <b>{{ arguments.user.last_login }}</b></span><br>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <button type="button" class="btn btn-dark btn-block my_border" role="button"
+                                    data-toggle="modal"
+                                    data-target="#EditModal">
+                                Редактировать данные
+                            </button>
+                            <button type="button" class="btn btn-danger btn-block my_border" role="button"
+                                    data-toggle="modal"
+                                    data-target="#DelModal">
+                                Удалить пользователя
+                            </button>
+                        </div>
+                    {% elif user|has_group:"Преподаватель" and arguments.user %}
+                        <div class="col my_border" style="background: white">
+                            <span>Табельный номер: <b>{{ arguments.user.id }}</b></span><br><br>
+                            <span>Фамилия: <b>{{ arguments.user.last_name }}</b></span><br>
+                            <span>Имя: <b>{{ arguments.user.first_name }}</b></span><br>
+                            <span>Отчество: <b>{{ arguments.user.userprofile.patronymic }}</b></span><br><br>
+                            <span> Роль:
+                                    <b>
+                                    {% for item in arguments.user.groups.all %}
+                                        {{ item.name }}
+                                    {% endfor %}
+                                    </b>
+                                </span><br><br>
+                            <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
+                            <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
+                            {% if user.is_superuser or user.is_staff %}
+                                <span>Пароль: <b>{{ arguments.user.userprofile.password }}</b></span><br><br>
                                 <span>Админ панель: <b>{% if arguments.user.is_staff %}Имеет{% else %}Не
                                     имеет{% endif %}</b></span><br>
                                 <span>Суперпользователь: <b>{% if arguments.user.is_superuser %}Да{% else %}
                                     Нет{% endif %}</b></span><br><br>
-                                <span>Дата регистрации: <b>{{ arguments.user.date_joined }}</b></span><br>
-                                <span>Последняя авторизация: <b>{{ arguments.user.last_login }}</b></span><br>
-                            </div>
+                            {% endif %}
+                            <span>Дата регистрации: <b>{{ arguments.user.date_joined }}</b></span><br>
+                            <span>Последняя авторизация: <b>{{ arguments.user.last_login }}</b></span><br>
                         </div>
-                    </div>
-                    <div class="col-4">
-                        <button type="button" class="btn btn-dark btn-block my_border" role="button"
-                                data-toggle="modal"
-                                data-target="#EditModal">
-                            Редактировать данные
-                        </button>
-                        <button type="button" class="btn btn-danger btn-block my_border" role="button"
-                                data-toggle="modal"
-                                data-target="#DelModal">
-                            Удалить пользователя
-                        </button>
-                    </div>
+                    {% endif %}
                 </div>
-                <div id="statics">
+                <div id="statics" class="my_border bg_white" style="margin-left: -15px; margin-right: -15px">
+                    <h4 style="text-align: center">Статистика пользователя по видам наук</h4>
                     <div class="row">
-
                     </div>
                 </div>
-            </div>
+                <div class="row my_border bg_white">
+                    <table class="table table-sm table-hover">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Предмет</th>
+                            <th scope="col">Тема теста</th>
+                            <th scope="col">Дата сдачи</th>
+                            <th scope="col">Оценка</th>
+                            <th scope="col">Статус завершения</th>
+                            <th scope="col">Статус пересдачи</th>
+                        </tr>
+                        </thead>
+                        <tbody>
 
-        {% elif user|has_group:"Преподаватель" and arguments.user %}
+                        {% for test in arguments.tests %}
+                            <tr onclick="window.location.href = '/adm/archive/{{ test.test_id.id }}/{{ test.id }}'">
+                                <th scope="row" data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра">{{ test.test_id.predmet_id.predmet_name_sokr }}</th>
+                                <td data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра">{{ test.test_id.test_name }}</td>
 
-            <div class="container">
-                <div class="row">
-                    <div class="col my_border" style="background: white">
-                        <span>Табельный номер: <b>{{ arguments.user.id }}</b></span><br><br>
-                        <span>Фамилия: <b>{{ arguments.user.last_name }}</b></span><br>
-                        <span>Имя: <b>{{ arguments.user.first_name }}</b></span><br>
-                        <span>Отчество: <b>{{ arguments.user.userprofile.patronymic }}</b></span><br><br>
-                        <span> Роль:
-                                    <b>
-                                    {% for item in arguments.user.groups.all %}
-                                        {{ item.name }}
-                                    {% endfor %}
-                                    </b>
-                                </span><br><br>
-                        <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
-                        <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
-                        {% if user.is_superuser or user.is_staff %}
-                            <span>Пароль: <b>{{ arguments.user.userprofile.password }}</b></span><br><br>
-                            <span>Админ панель: <b>{% if arguments.user.is_staff %}Имеет{% else %}Не
-                                имеет{% endif %}</b></span><br>
-                            <span>Суперпользователь: <b>{% if arguments.user.is_superuser %}Да{% else %}
-                                Нет{% endif %}</b></span><br><br>
-                        {% endif %}
-                        <span>Дата регистрации: <b>{{ arguments.user.date_joined }}</b></span><br>
-                        <span>Последняя авторизация: <b>{{ arguments.user.last_login }}</b></span><br>
-                    </div>
+                            {% if test.end_status %}
+                                {% if test.override_status %}
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span>{{ test.end_time }}</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span>{{ test.ocenka }}%</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span>Сдан</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: red">Пересдача</span>
+                                    </td>
+                                {% else %}
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: forestgreen; font-weight: bold">Сдан</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: forestgreen; font-weight: bold">Засчитан</span>
+                                    </td>
+                                {% endif %}
+                            {% else %}
+                                <td colspan="4" data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра" style="text-align: center">Решение
+                                </td>
+                            {% endif %}
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <div id="statics">
-                    <div class="row">
-
-                    </div>
-                </div>
             </div>
-
-        {% elif not arguments.user %}
-            <div class="alert alert-danger my_border">
-                <p class="text">Пользователь не найден!</p>
-            </div>
-        {% endif %}
-        {% if arguments.user %}
             <script>
                 generBlock_stats("{{ arguments.marksCanvas_data }}");
             </script>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                <p class="text">Пользователь не найден!</p>
+            </div>
         {% endif %}
     </div>
 

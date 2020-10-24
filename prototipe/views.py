@@ -867,11 +867,12 @@ def user_look_admin(request, user_id):
     if request.user.is_authenticated and (
             has_group(request.user, 'Администратор') or has_group(request.user, 'Преподаватель')):
         if request.method == 'GET':
-            # try:
-            arguments.update(user=User.objects.get(id=user_id))
-            arguments.update(marksCanvas_data=get_user_all_stats(user_id))
-            # except:
-            #     arguments.update(error='Пользователь не найден!')
+            try:
+                arguments.update(user=User.objects.get(id=user_id))
+                arguments.update(marksCanvas_data=get_user_all_stats(user_id))
+                arguments.update(tests=test_for_user.objects.filter(user_id=user_id))
+            except:
+                arguments.update(error='Пользователь не найден!')
             return render(request, 'prototipe/admin/user_look.html', {'arguments': arguments})
         else:
             return HttpResponse('405 Method Not Allowed', status=405)

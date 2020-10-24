@@ -25,11 +25,10 @@ function generBlock_stats(data_spisok) {
     data_spisok.forEach(function (item, i, data_spisok) {
         local_count += 1
         if ((local_count / 3) === 0) {
-            $('#statics').append('<div class="row"></div>')
+            $('#statics').append('<div class="row align-items-center"></div>')
         }
-        $('#statics').children(".row").last().append('<div class="col-4"><canvas id="marksChart_' + i + '" width="600" height="400"></canvas></div>')
+        $('#statics').children(".row").last().append('<div class="col-4 align-self-center"><canvas id="marksChart_' + i + '" width="600" height="400"></canvas></div>')
 
-        console.log(item['result'])
         var radarChart = new Chart(document.getElementById("marksChart_" + i), {
             type: 'radar',
             data: {

@@ -30,10 +30,24 @@
 }
 
 .my_border {
-    .border;
-    .shadow;
+    /*.border;*/
+    /*.shadow;*/
+    /*border-radius: 20px 20px 20px 20px;*/
+    /*margin-top: 20px;*/
+    /*margin-bottom: 20px;*/
+    /*border-color: #cecfd3;*/
+    margin-bottom: 20px;
+    border: 1px solid #cecfd3!important;
     border-radius: 20px 20px 20px 20px;
     margin-top: 20px;
-    margin-bottom: 20px;
-    border-color: #cecfd3;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.bg_white {
+    background: white;
+}
+
+.pd_lr {
+    padding-left: 15px;
+    padding-right: 15px;
 }

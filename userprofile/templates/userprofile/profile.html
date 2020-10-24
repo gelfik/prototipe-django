@@ -5,143 +5,151 @@
 {% block content %}
     <div class="container">
         <div class="my_border" style="background: white">
-            <div class="row">
-                <div class="col-2">
-                    <div class="list-group" id="list-tab" role="tablist">
-                        <a class="list-group-item list-group-item-action active" id="list-profile-list"
-                           data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Профиль</a>
-                        <a class="list-group-item list-group-item-action" id="list-test-list" data-toggle="list"
-                           href="#list-test" role="tab" aria-controls="test">Тесты</a>
-                        <a class="list-group-item list-group-item-action" id="list-stats-list" data-toggle="list"
-                           href="#list-stats" role="tab" aria-controls="stats">Статистика</a>
+            <ul class="nav nav-tabs" id="list-tab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="list-profile-list"
+                       data-toggle="list" href="#list-profile" role="tab"
+                       aria-controls="profile">Профиль</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="list-test-list" data-toggle="list"
+                       href="#list-test" role="tab" aria-controls="test">Тесты</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="list-stats-list"
+                       data-toggle="list"
+                       href="#list-stats" role="tab" aria-controls="stats">Статистика</a>
+                </li>
+            </ul>
+
+
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active pd_lr" id="list-profile" role="tabpanel"
+                     aria-labelledby="list-profile-list">
+                    <div class="row">
+                        <div class="col">
+                            <h2>{{ user.last_name }} {{ user.first_name }} {{ user.userprofile.patronymic }}</h2>
+                        </div>
                     </div>
-                </div>
-                <div class="col-10">
-                    <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade show active" id="list-profile" role="tabpanel"
-                             aria-labelledby="list-profile-list">
-                            <div class="row">
-                                <h2>{{ user.last_name }} {{ user.first_name }} {{ user.userprofile.patronymic }}</h2>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                    <span class="font-weight-bold">Табельный номер</span>
-                                </div>
-                                <div class="col-9">
-                                    <span class="font-weight-normal">{{ user.id }}</span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                    <span class="font-weight-bold">Логин</span>
-                                </div>
-                                <div class="col-9">
-                                    <span class="font-weight-normal">{{ user.username }}</span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                    <span class="font-weight-bold">Email</span>
-                                </div>
-                                <div class="col-9">
-                                    <span class="font-weight-normal">{{ user.email }}</span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                    <span class="font-weight-bold">Статус сотрудника</span>
-                                </div>
-                                <div class="col-9">
-                                    <span class="font-weight-normal">{{ user.is_staff }}</span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                    <span class="font-weight-bold">Роль</span>
-                                </div>
-                                <div class="col-9">
+                    <div class="row">
+                        <div class="col-3">
+                            <span class="font-weight-bold">Табельный номер</span>
+                        </div>
+                        <div class="col-9">
+                            <span class="font-weight-normal">{{ user.id }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <span class="font-weight-bold">Логин</span>
+                        </div>
+                        <div class="col-9">
+                            <span class="font-weight-normal">{{ user.username }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <span class="font-weight-bold">Email</span>
+                        </div>
+                        <div class="col-9">
+                            <span class="font-weight-normal">{{ user.email }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <span class="font-weight-bold">Статус сотрудника</span>
+                        </div>
+                        <div class="col-9">
+                            <span class="font-weight-normal">{{ user.is_staff }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <span class="font-weight-bold">Роль</span>
+                        </div>
+                        <div class="col-9">
                                     <span class="font-weight-normal">
                                         {% for item in user.groups.all %}
                                             {{ item.name }}<br>
                                         {% endfor %}
                                     </span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                    <span class="font-weight-bold">Дата регистрации</span>
-                                </div>
-                                <div class="col-9">
-                                    <span class="font-weight-normal">{{ user.date_joined }}</span>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-3">
-                                    <span class="font-weight-bold">Последняя авторизация</span>
-                                </div>
-                                <div class="col-9">
-                                    <span class="font-weight-normal">{{ user.last_login }}</span>
-                                </div>
-                            </div>
                         </div>
-                        <div class="tab-pane fade" id="list-test" role="tabpanel"
-                             aria-labelledby="list-test-list">
-                            {% if arguments.tests|cheak_count_list %}
-                                <table class="table table-sm table-hover">
-                                    <thead class="thead-dark">
-                                    <tr>
-                                        <th scope="col">Тема теста</th>
-                                        <th scope="col">Сдача теста</th>
-                                        <th scope="col">Оценка</th>
-                                        <th scope="col">Пересдача</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for test in arguments.tests %}
-                                        <tr onclick="window.open('/tests/{{ test.test_id.predmet_id.predmet_name_sokr_translite }}/{{ test.test_id.id }}/{{ test.id }}')"
-                                            data-toggle="tooltip" data-placement="bottom" title="Нажмите для открытия">
-                                            <th scope="row">{{ test.test_id.test_name }}</th>
-                                            {% if not test.end_status %}
-                                                <td colspan="2">Не решен</td>
-                                            {% else %}
-                                                <td>{{ test.end_time }}</td>
-                                                <td>{{ test.ocenka }}%</td>
-                                            {% endif %}
-                                            <td>
-                                                {% if test.override_status %}Не
-                                                    засчитан
-                                                {% elif not test.end_status and not test.override_status %}
-                                                    Решается
-                                                {% elif test.end_status and not test.override_status %}
-                                                    Засчитан
-                                                {% else %}
-                                                    Не известно!
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
-                            {% else %}
-                                <div class="alert alert-danger my_border">
-                                    Нет решенных тестов!
-                                </div>
-                            {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <span class="font-weight-bold">Дата регистрации</span>
                         </div>
-                        <div class="tab-pane fade" id="list-stats" role="tabpanel"
-                             aria-labelledby="list-stats-list">
-                            <div id="statics">
-                                <div class="row">
-
-                                </div>
-                            </div>
-                            <script>
-                                generBlock_stats("{{ arguments.marksCanvas_data }}");
-                            </script>
+                        <div class="col-9">
+                            <span class="font-weight-normal">{{ user.date_joined }}</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <span class="font-weight-bold">Последняя авторизация</span>
+                        </div>
+                        <div class="col-9">
+                            <span class="font-weight-normal">{{ user.last_login }}</span>
                         </div>
                     </div>
                 </div>
+                <div class="tab-pane fade" id="list-test" role="tabpanel"
+                     aria-labelledby="list-test-list">
+                    {% if arguments.tests|cheak_count_list %}
+                        <table class="table table-sm table-hover">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th scope="col">Тема теста</th>
+                                <th scope="col">Сдача теста</th>
+                                <th scope="col">Оценка</th>
+                                <th scope="col">Пересдача</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for test in arguments.tests %}
+                                <tr onclick="window.open('/tests/{{ test.test_id.predmet_id.predmet_name_sokr_translite }}/{{ test.test_id.id }}/{{ test.id }}')"
+                                    data-toggle="tooltip" data-placement="bottom" title="Нажмите для открытия">
+                                    <th scope="row">{{ test.test_id.test_name }}</th>
+                                    {% if not test.end_status %}
+                                        <td colspan="2">Не решен</td>
+                                    {% else %}
+                                        <td>{{ test.end_time }}</td>
+                                        <td>{{ test.ocenka }}%</td>
+                                    {% endif %}
+                                    <td>
+                                        {% if test.override_status %}Не
+                                            засчитан
+                                        {% elif not test.end_status and not test.override_status %}
+                                            Решается
+                                        {% elif test.end_status and not test.override_status %}
+                                            Засчитан
+                                        {% else %}
+                                            Не известно!
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-danger my_border">
+                            Нет решенных тестов!
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="tab-pane fade pd_lr" id="list-stats" role="tabpanel"
+                     aria-labelledby="list-stats-list" style="margin-left: -50px;">
+                    <div id="statics">
+                        <div class="row align-items-center">
+
+                        </div>
+                    </div>
+                    <script>
+                        generBlock_stats("{{ arguments.marksCanvas_data }}");
+                    </script>
+                </div>
             </div>
+
+
         </div>
     </div>
 {% endblock %}
