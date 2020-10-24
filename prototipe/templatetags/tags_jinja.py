@@ -24,3 +24,17 @@ def data_for_input(data):
         return data.strftime("%Y-%m-%d")
     except :
         return data
+
+@register.filter(name='get_int')
+def get_int(data):
+    try:
+        return int(data)
+    except:
+        return 0
+
+@register.filter(name='to_js')
+def to_js(data):
+    local_data = []
+    for i in data:
+        local_data.append(i)
+    return local_data

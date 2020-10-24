@@ -12,8 +12,8 @@
                            data-toggle="list" href="#list-profile" role="tab" aria-controls="profile">Профиль</a>
                         <a class="list-group-item list-group-item-action" id="list-test-list" data-toggle="list"
                            href="#list-test" role="tab" aria-controls="test">Тесты</a>
-                        <a class="list-group-item list-group-item-action" id="list-settings-list" data-toggle="list"
-                           href="#list-settings" role="tab" aria-controls="settings">Settings</a>
+                        <a class="list-group-item list-group-item-action" id="list-stats-list" data-toggle="list"
+                           href="#list-stats" role="tab" aria-controls="stats">Статистика</a>
                     </div>
                 </div>
                 <div class="col-10">
@@ -98,7 +98,8 @@
                                     </thead>
                                     <tbody>
                                     {% for test in arguments.tests %}
-                                        <tr onclick="window.open('/tests/{{ test.test_id.predmet_id.predmet_name_sokr_translite }}/{{ test.test_id.id }}/{{ test.id }}')" data-toggle="tooltip" data-placement="bottom" title="Нажмите для открытия">
+                                        <tr onclick="window.open('/tests/{{ test.test_id.predmet_id.predmet_name_sokr_translite }}/{{ test.test_id.id }}/{{ test.id }}')"
+                                            data-toggle="tooltip" data-placement="bottom" title="Нажмите для открытия">
                                             <th scope="row">{{ test.test_id.test_name }}</th>
                                             {% if not test.end_status %}
                                                 <td colspan="2">Не решен</td>
@@ -127,8 +128,16 @@
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="tab-pane fade" id="list-settings" role="tabpanel"
-                             aria-labelledby="list-settings-list">...
+                        <div class="tab-pane fade" id="list-stats" role="tabpanel"
+                             aria-labelledby="list-stats-list">
+                            <div id="statics">
+                                <div class="row">
+
+                                </div>
+                            </div>
+                            <script>
+                                generBlock_stats("{{ arguments.marksCanvas_data }}");
+                            </script>
                         </div>
                     </div>
                 </div>

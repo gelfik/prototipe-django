@@ -17,13 +17,13 @@
             </ol>
         </nav>
 
-        {% if user|has_group:"Администратор" and arguments.error %}
+        {% if user|has_group:"Администратор" and arguments.error or user|has_group:"Преподаватель" and arguments.error %}
             <div class="alert alert-danger my_border">
                 {{ arguments.error }}
             </div>
         {% endif %}
 
-        {% if arguments.user %}
+        {% if user|has_group:"Администратор" and arguments.user %}
             <div class="container">
                 <div class="row">
                     <div class="col-8 my_border" style="background: white">
@@ -33,18 +33,18 @@
                                 <span>Фамилия: <b>{{ arguments.user.last_name }}</b></span><br>
                                 <span>Имя: <b>{{ arguments.user.first_name }}</b></span><br>
                                 <span>Отчество: <b>{{ arguments.user.userprofile.patronymic }}</b></span><br><br>
-                                <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
-                                <span>Email: <b>{{ arguments.user.email }}</b></span><br>
-                                {% if user.is_superuser or user.is_staff %}
-                                    <span>Пароль: <b>{{ arguments.user.userprofile.password }}</b></span><br><br>
-                                {% endif %}
                                 <span> Роль:
                                     <b>
                                     {% for item in arguments.user.groups.all %}
                                         {{ item.name }}
                                     {% endfor %}
                                     </b>
-                                </span><br>
+                                </span><br><br>
+                                <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
+                                <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
+                                {% if user.is_superuser or user.is_staff %}
+                                    <span>Пароль: <b>{{ arguments.user.userprofile.password }}</b></span><br><br>
+                                {% endif %}
                                 <span>Админ панель: <b>{% if arguments.user.is_staff %}Имеет{% else %}Не
                                     имеет{% endif %}</b></span><br>
                                 <span>Суперпользователь: <b>{% if arguments.user.is_superuser %}Да{% else %}
@@ -55,7 +55,8 @@
                         </div>
                     </div>
                     <div class="col-4">
-                        <button type="button" class="btn btn-dark btn-block my_border" role="button" data-toggle="modal"
+                        <button type="button" class="btn btn-dark btn-block my_border" role="button"
+                                data-toggle="modal"
                                 data-target="#EditModal">
                             Редактировать данные
                         </button>
@@ -66,16 +67,63 @@
                         </button>
                     </div>
                 </div>
+                <div id="statics">
+                    <div class="row">
+
+                    </div>
+                </div>
             </div>
-        {% else %}
+
+        {% elif user|has_group:"Преподаватель" and arguments.user %}
+
+            <div class="container">
+                <div class="row">
+                    <div class="col my_border" style="background: white">
+                        <span>Табельный номер: <b>{{ arguments.user.id }}</b></span><br><br>
+                        <span>Фамилия: <b>{{ arguments.user.last_name }}</b></span><br>
+                        <span>Имя: <b>{{ arguments.user.first_name }}</b></span><br>
+                        <span>Отчество: <b>{{ arguments.user.userprofile.patronymic }}</b></span><br><br>
+                        <span> Роль:
+                                    <b>
+                                    {% for item in arguments.user.groups.all %}
+                                        {{ item.name }}
+                                    {% endfor %}
+                                    </b>
+                                </span><br><br>
+                        <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
+                        <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
+                        {% if user.is_superuser or user.is_staff %}
+                            <span>Пароль: <b>{{ arguments.user.userprofile.password }}</b></span><br><br>
+                            <span>Админ панель: <b>{% if arguments.user.is_staff %}Имеет{% else %}Не
+                                имеет{% endif %}</b></span><br>
+                            <span>Суперпользователь: <b>{% if arguments.user.is_superuser %}Да{% else %}
+                                Нет{% endif %}</b></span><br><br>
+                        {% endif %}
+                        <span>Дата регистрации: <b>{{ arguments.user.date_joined }}</b></span><br>
+                        <span>Последняя авторизация: <b>{{ arguments.user.last_login }}</b></span><br>
+                    </div>
+                </div>
+                <div id="statics">
+                    <div class="row">
+
+                    </div>
+                </div>
+            </div>
+
+        {% elif not arguments.user %}
             <div class="alert alert-danger my_border">
                 <p class="text">Пользователь не найден!</p>
             </div>
         {% endif %}
+        {% if arguments.user %}
+            <script>
+                generBlock_stats("{{ arguments.marksCanvas_data }}");
+            </script>
+        {% endif %}
     </div>
 
 
-    {% if arguments.user %}
+    {% if arguments.user and user|has_group:"Администратор" %}
         <!-- Edit User Modal -->
         <div class="modal fade" id="EditModal" tabindex="-1" role="dialog"
              aria-labelledby="EditModalLabel"
@@ -226,7 +274,8 @@
                         {% csrf_token %}
                         <div class="modal-body">
                             <p><b>Внимание!</b><br>
-                                Если вы удалите данного пользователя, то вместе с ним удаляться все его решения тестов, а так же тесты, если он их создавал!
+                                Если вы удалите данного пользователя, то вместе с ним удаляться все его решения тестов,
+                                а так же тесты, если он их создавал!
                             </p>
                         </div>
                         <div class="modal-footer">

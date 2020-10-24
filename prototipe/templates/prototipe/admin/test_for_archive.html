@@ -33,56 +33,55 @@
 
         {% if arguments.test and arguments.test_voprosi|cheak_count_list %}
             <div class="my_border">
-                <div class="row">
+            <div class="row">
+                {% if arguments.test.end_status %}
                     <div class="col-6">
-                        <div class="alert alert-primary" role="alert">
-                            Предмет: <b>{{ arguments.test.test_id.predmet_id.predmet_name }}</b><br>
-                            Тема теста: <b>{{ arguments.test.test_id.test_name }}</b>
+                {% else %}
+                    <div class="col">
+                {% endif %}
+                <div class="alert alert-primary" role="alert">
+                    Предмет: <b>{{ arguments.test.test_id.predmet_id.predmet_name }}</b><br>
+                    Тема теста: <b>{{ arguments.test.test_id.test_name }}</b>
+                    <hr>
+                    Начало решения теста: <b>{{ arguments.test.start_time }}</b><br>
+                    {% if arguments.test.end_status %}
+                        Окончание решения теста: <b>{{ arguments.test.end_time }}</b><br>
+                        <hr>
+                        Тест сдал:
+                        <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
+                        <br>
+                        Оценка: <b>{{ arguments.test.ocenka }}%</b><br>
+                    {% else %}
+                        Тест сдает:
+                        <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
+                        <br>
+                    {% endif %}
+                    {% if arguments.test.end_status %}
+                        {% if arguments.test.override_status %}
                             <hr>
-                            Начало решения теста: <b>{{ arguments.test.start_time }}</b><br>
-                            {% if arguments.test.end_status %}
-                                Окончание решения теста: <b>{{ arguments.test.end_time }}</b><br>
-                                <hr>
-                                Тест сдал:
-                                <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
-                                <br>
-                                Оценка: <b>{{ arguments.test.ocenka }}%</b><br>
-                            {% else %}
-                                Тест сдает:
-                                <b>{{ arguments.test.user_id.last_name }} {{ arguments.test.user_id.first_name }} {{ arguments.test.user_id.userprofile.patronymic }}</b>
-                                <br>
-                            {% endif %}
-                            {% if arguments.test.override_status %}
-                                <hr>
-                                <span style="font-weight: bold; color: red">НЕ ЗАСЧИТАН, ОТПРАВЛЕН НА ПЕРЕСДАЧУ!</span>
-                            {% else %}
-                                <hr>
-                                <span style="font-weight: bold; color: forestgreen">ЗАСЧИТАН</span>
-                            {% endif %}
-                        </div>
-                    </div>
+                            <span style="font-weight: bold; color: red">НЕ ЗАСЧИТАН, ОТПРАВЛЕН НА ПЕРЕСДАЧУ!</span>
+                        {% else %}
+                            <hr>
+                            <span style="font-weight: bold; color: forestgreen">ЗАСЧИТАН</span>
+                        {% endif %}
+                    {% else %}
+                        <hr>
+                        <span style="font-weight: bold; color: red">В процессе решения!</span>
+                    {% endif %}
+                </div>
+                </div>
+                {% if arguments.test.end_status %}
                     <div class="col-lg-6">
                         <canvas id="marksChart" width="600" height="400"></canvas>
                         <script>
                             var marksCanvas = document.getElementById("marksChart");
 
-                            let labels = []
-                            let data = []
-
-                            {% for vopros in arguments.test_voprosi %}
-                                labels.push('{{ vopros.voprosi_id.vopros }}')
-                                {% if vopros.otvet_status %}
-                                    data.push(1)
-                                {% else %}
-                                    data.push(0)
-                                {% endif %}
-                            {% endfor %}
                             var marksData = {
-                                labels: labels,
+                                labels: ['A', 'B', 'C', 'POL', 'CHL'],
                                 datasets: [{
-                                    label: "Ответы",
+                                    label: "Статистика",
                                     backgroundColor: "rgba(200,0,0,0.2)",
-                                    data: data
+                                    data: {{ arguments.marksCanvas_data }}
                                 }]
                             };
 
@@ -93,27 +92,43 @@
                                     scale: {
                                         display: true,
                                         ticks: {
+                                            display: false,
                                             beginAtZero: true,
-                                            max: 1,
+                                            max: 100,
                                             min: 0,
-                                            stepSize: 1
-                                        }
+                                            stepSize: 1,
+                                            showLabelBackdrop: false,
+                                        },
                                     }
                                 }
                             });
                         </script>
                     </div>
+                {% endif %}
                 </div>
             </div>
 
-            {% if not arguments.test.override_status %}
+
+            {% if arguments.test.end_status and not arguments.test.override_status %}
                 <form>
                     {% csrf_token %}
-                    <button type="submit" formmethod="post" class="btn btn-danger btn-block my_border" role="button">
+                    <button type="submit" formmethod="post" class="btn btn-danger btn-block my_border"
+                            role="button">
                         Отправить на пересдачу
                     </button>
                 </form>
+
             {% endif %}
+
+
+            {#            {% if not arguments.test.override_status %}#}
+            {#                <form>#}
+            {#                    {% csrf_token %}#}
+            {#                    <button type="submit" formmethod="post" class="btn btn-danger btn-block my_border" role="button">#}
+            {#                        Отправить на пересдачу#}
+            {#                    </button>#}
+            {#                </form>#}
+            {#            {% endif %}#}
 
             <div class="accordion" id="accordionASK">
                 {% for vopros in arguments.test_voprosi %}
@@ -148,5 +163,5 @@
                 Вопросы не найдены!
             </div>
         {% endif %}
-    </div>
+        </div>
 {% endblock %}

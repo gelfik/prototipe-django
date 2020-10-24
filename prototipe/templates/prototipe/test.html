@@ -14,18 +14,61 @@
                 {% endif %}
             </ol>
         </nav>
-    
+
         {% if arguments.test_for_user and arguments.test and arguments.test_voprosi|cheak_count_list %}
-            <div class="alert alert-primary" role="alert">
-                <p>Тема теста: <b>{{ arguments.test.test_name }}</b></p>
+            <div class="row">
+            {% if arguments.test_for_user.end_status %}
+                <div class="col-6">
+            {% else %}
+                <div class="col">
+            {% endif %}
+        <div class="alert alert-primary" role="alert">
+            <p>Тема теста: <b>{{ arguments.test.test_name }}</b></p>
+            <hr>
+            <p>Начало решения теста: <b>{{ arguments.test_for_user.start_time }}</b></p>
+            {% if arguments.test_for_user.end_status %}
+                <p>Окончание решения теста: <b>{{ arguments.test_for_user.end_time }}</b></p>
                 <hr>
-                <p>Начало решения теста: <b>{{ arguments.test_for_user.start_time }}</b></p>
-                {% if arguments.test_for_user.end_status %}
-                    <p>Окончание решения теста: <b>{{ arguments.test_for_user.end_time }}</b></p>
-                    <hr>
-                    <p>Ваша оценка: <b>{{ arguments.test_for_user.ocenka }}%</b></p>
-                {% endif %}
+                <p>Ваша оценка: <b>{{ arguments.test_for_user.ocenka }}%</b></p>
+            {% endif %}
+        </div>
+        </div>
+        {% if arguments.test_for_user.end_status %}
+            <div class="col-6">
+                <canvas id="marksChart" width="600" height="400"></canvas>
+                <script>
+                    var marksCanvas = document.getElementById("marksChart");
+
+                    var marksData = {
+                        labels: ['A', 'B', 'C', 'POL', 'CHL'],
+                        datasets: [{
+                            label: "Статистика",
+                            backgroundColor: "rgba(200,0,0,0.2)",
+                            data: {{ arguments.marksCanvas_data }}
+                        }]
+                    };
+
+                    var radarChart = new Chart(marksCanvas, {
+                        type: 'radar',
+                        data: marksData,
+                        options: {
+                            scale: {
+                                display: true,
+                                ticks: {
+                                    display: false,
+                                    beginAtZero: true,
+                                    max: 100,
+                                    min: 0,
+                                    stepSize: 1,
+                                    showLabelBackdrop: false,
+                                },
+                            }
+                        }
+                    });
+                </script>
             </div>
+        {% endif %}
+        </div>
             {% if arguments.error_message %}
                 <div class="alert alert-danger" role="alert">
                     <p>Ошибка: <b>{{ arguments.error_message }}</b></p>
@@ -104,5 +147,5 @@
                 Тест не найден или завершен!
             </div>
         {% endif %}
-    </div>
+        </div>
 {% endblock %}

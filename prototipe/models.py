@@ -21,12 +21,23 @@ class RandomManager(models.Manager):
         print(answer)
         return answer
 
+class type_sciences(models.Model):
+    sciences_name = models.CharField('Название науки', max_length=100, default=None)
+
+    class Meta:
+        verbose_name = 'Вид науки'
+        verbose_name_plural = 'Виды наук'
+        db_table = 'type_sciences'
+
+    def __str__(self):
+        return self.sciences_name
 
 class predmet(models.Model):
     predmet_name = models.CharField('Название предмета', max_length=256, default=None, unique=True)
     predmet_name_sokr = models.CharField('Название предмета сокращенно', max_length=20, default=None, unique=True)
     predmet_name_sokr_translite = models.CharField('Название предмета сокращенно англ', max_length=30, default=None,
                                                    blank=True, unique=True)
+    type_sciences_id = models.ForeignKey(type_sciences, on_delete=models.CASCADE, verbose_name='Наука', default=None)
 
     def save(self, *args, **kwargs):
         def translit(text):
@@ -74,6 +85,11 @@ class voprosi(models.Model):
     vopros = models.TextField('Вопрос', default=None)
     otvet = models.CharField('Ответ', max_length=256, default=None)
     test_id = models.ForeignKey(test, on_delete=models.CASCADE, verbose_name='Тест')
+    A_score = models.FloatField('Формализационная оценка', default=0)
+    B_score = models.FloatField('Конструктивная оценка', default=0)
+    C_score = models.FloatField('Исполнительская оценка', default=0)
+    POL_score = models.FloatField('Исполнительская оценка', default=0)
+    CHL_score = models.FloatField('Исполнительская оценка', default=0)
 
     objects = RandomManager()
 

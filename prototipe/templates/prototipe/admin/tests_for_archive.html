@@ -64,14 +64,14 @@
         {% if arguments.tests %}
 
             <div class="my_border" style="background: white">
-                <div class="row">
-                    <div class="col-6">
-                        <canvas id="marksChart_Sdan" width="100" height="25"></canvas>
-                    </div>
-                    <div class="col-6">
-                        <canvas id="marksChart" width="100" height="25"></canvas>
-                    </div>
+                {#                <div class="row">#}
+                <div class="col">
+                    <canvas id="marksChart_Sdan" width="100" height="20"></canvas>
                 </div>
+                <div class="col">
+                    <canvas id="marksChart" width="100" height="20"></canvas>
+                </div>
+                {#                </div>#}
             </div>
 
 
@@ -93,60 +93,70 @@
                         <tr onclick="window.location.href = '/adm/archive/{{ test.test_id.id }}/{{ test.id }}'">
                             <th data-toggle="tooltip" data-placement="bottom"
                                 title="Нажмите для просмотра">
-                                {% if test.override_status %}
-                                    <span>{{ test.user_id.last_name }} {{ test.user_id.first_name }} {{ test.user_id.userprofile.patronymic }}</span>
+                                {% if test.end_status %}
+                                    {% if test.override_status %}
+                                        <span>{{ test.user_id.last_name }} {{ test.user_id.first_name }} {{ test.user_id.userprofile.patronymic }}</span>
+                                    {% else %}
+                                        <span style="color: forestgreen; font-weight: bold">{{ test.user_id.last_name }} {{ test.user_id.first_name }} {{ test.user_id.userprofile.patronymic }}</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span style="color: forestgreen; font-weight: bold">{{ test.user_id.last_name }} {{ test.user_id.first_name }} {{ test.user_id.userprofile.patronymic }}</span>
+                                    <span>{{ test.user_id.last_name }} {{ test.user_id.first_name }} {{ test.user_id.userprofile.patronymic }}</span>
                                 {% endif %}
                             </th>
                             <td data-toggle="tooltip" data-placement="bottom"
                                 title="Нажмите для просмотра">
-                                {% if test.override_status %}
+                                {% if test.end_status %}
+                                    {% if test.override_status %}
+                                        <span>{{ test.start_time }}</span>
+                                    {% else %}
+                                        <span style="color: forestgreen; font-weight: bold">{{ test.start_time }}</span>
+                                    {% endif %}
+                                {% else %}
                                     <span>{{ test.start_time }}</span>
-                                {% else %}
-                                    <span style="color: forestgreen; font-weight: bold">{{ test.start_time }}</span>
                                 {% endif %}
                             </td>
-                            <td data-toggle="tooltip" data-placement="bottom"
-                                title="Нажмите для просмотра">
-                                {% if test.end_status %}
-                                    {% if test.override_status %}
+
+                            {% if test.end_status %}
+                                {% if test.override_status %}
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
                                         <span>{{ test.end_time }}</span>
-                                    {% else %}
-                                        <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
-                                    {% endif %}
-                                {% else %}
-                                    В процессе решения
-                                {% endif %}
-                            </td>
-                            <td data-toggle="tooltip" data-placement="bottom"
-                                title="Нажмите для просмотра">
-                                {% if test.override_status %}
-                                    <span>{{ test.ocenka }}%</span>
-                                {% else %}
-                                    <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
-                                {% endif %}
-                            </td>
-                            <td data-toggle="tooltip" data-placement="bottom"
-                                title="Нажмите для просмотра">
-                                {% if test.end_status %}
-                                    {% if test.override_status %}
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span>{{ test.ocenka }}%</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
                                         <span>Сдан</span>
-                                    {% else %}
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: red">Пересдача</span>
+                                    </td>
+                                {% else %}
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
                                         <span style="color: forestgreen; font-weight: bold">Сдан</span>
-                                    {% endif %}
-                                {% else %}
-                                    В процессе решения
+                                    </td>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">
+                                        <span style="color: forestgreen; font-weight: bold">Засчитан</span>
+                                    </td>
                                 {% endif %}
-                            </td>
-                            <td data-toggle="tooltip" data-placement="bottom"
-                                title="Нажмите для просмотра">
-                                {% if test.override_status %}
-                                    <span style="color: red">Пересдача</span>
-                                {% else %}
-                                    <span style="color: forestgreen; font-weight: bold">Засчитан</span>
-                                {% endif %}
-                            </td>
+                            {% else %}
+                                <td colspan="4" data-toggle="tooltip" data-placement="bottom"
+                                    title="Нажмите для просмотра" style="text-align: center">Решение
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -168,8 +178,9 @@
                 var marksCanvas = document.getElementById("marksChart");
                 var labels = []
                 var data = []
+
                 {% for test in arguments.tests %}
-                    {% if test.override_status %}
+                    {% if test.override_status and test.end_status %}
                         labels.push('{{ test.user_id.last_name }} {{ test.user_id.first_name }}')
                         data.push({{ test.ocenka }})
                     {% endif %}
@@ -191,7 +202,12 @@
                                 stacked: true
                             }],
                             yAxes: [{
-                                stacked: true
+                                stacked: true,
+                                ticks: {
+                                    max: 100,
+                                    min: 0,
+                                    stepSize: 1,
+                                },
                             }]
                         }
                     }
@@ -201,7 +217,7 @@
                 var labels_Sdan = []
                 var data_Sdan = []
                 {% for test in arguments.tests %}
-                    {% if not test.override_status %}
+                    {% if not test.override_status and test.end_status %}
                         labels_Sdan.push('{{ test.user_id.last_name }} {{ test.user_id.first_name }}')
                         data_Sdan.push({{ test.ocenka }})
                     {% endif %}
@@ -223,8 +239,13 @@
                                 stacked: true
                             }],
                             yAxes: [{
-                                stacked: true
-                            }]
+                                stacked: true,
+                                ticks: {
+                                    max: 100,
+                                    min: 0,
+                                    stepSize: 1,
+                                },
+                            }],
                         }
                     }
                 });
