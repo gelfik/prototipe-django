@@ -40,7 +40,17 @@
                                         {{ item.name }}
                                     {% endfor %}
                                     </b>
-                                </span><br><br>
+                                    </span><br>
+                                    {% if arguments.expert_data|cheak_count_list %}
+                                        <span> Науки эксперта:
+                                        <b>
+                                    {% for item in arguments.expert_data %}
+                                        {{ item.type_sciences_id.sciences_name }}
+                                    {% endfor %}
+                                    </b>
+                                    </span><br>
+                                    {% endif %}
+                                    <br>
                                     <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
                                     <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
                                     {% if user.is_superuser or user.is_staff %}
@@ -79,7 +89,17 @@
                                         {{ item.name }}
                                     {% endfor %}
                                     </b>
-                                </span><br><br>
+                                </span><br>
+                            {% if arguments.expert_data|cheak_count_list %}
+                                <span> Науки эксперта:
+                                        <b>
+                                    {% for item in arguments.expert_data %}
+                                        {{ item.type_sciences_id.sciences_name }}
+                                    {% endfor %}
+                                    </b>
+                                    </span><br>
+                            {% endif %}
+                            <br>
                             <span>Логин: <b>{{ arguments.user.username }}</b></span><br>
                             <span>Email: <b>{{ arguments.user.email }}</b></span><br><br>
                             {% if user.is_superuser or user.is_staff %}
@@ -120,47 +140,47 @@
                                 <td data-toggle="tooltip" data-placement="bottom"
                                     title="Нажмите для просмотра">{{ test.test_id.test_name }}</td>
 
-                            {% if test.end_status %}
-                                {% if test.override_status %}
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span>{{ test.end_time }}</span>
-                                    </td>
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span>{{ test.ocenka }}%</span>
-                                    </td>
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span>Сдан</span>
-                                    </td>
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span style="color: red">Пересдача</span>
-                                    </td>
+                                {% if test.end_status %}
+                                    {% if test.override_status %}
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span>{{ test.end_time }}</span>
+                                        </td>
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span>{{ test.ocenka }}%</span>
+                                        </td>
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span>Сдан</span>
+                                        </td>
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span style="color: red">Пересдача</span>
+                                        </td>
+                                    {% else %}
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
+                                        </td>
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
+                                        </td>
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span style="color: forestgreen; font-weight: bold">Сдан</span>
+                                        </td>
+                                        <td data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра">
+                                            <span style="color: forestgreen; font-weight: bold">Засчитан</span>
+                                        </td>
+                                    {% endif %}
                                 {% else %}
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
-                                    </td>
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
-                                    </td>
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span style="color: forestgreen; font-weight: bold">Сдан</span>
-                                    </td>
-                                    <td data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра">
-                                        <span style="color: forestgreen; font-weight: bold">Засчитан</span>
+                                    <td colspan="4" data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра" style="text-align: center">Решение
                                     </td>
                                 {% endif %}
-                            {% else %}
-                                <td colspan="4" data-toggle="tooltip" data-placement="bottom"
-                                    title="Нажмите для просмотра" style="text-align: center">Решение
-                                </td>
-                            {% endif %}
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -251,6 +271,11 @@
                                                 selected {% endif %}
                                                 value="Пользователь">
                                                 Пользователь
+                                            </option>
+                                            <option {% if arguments.user|has_group:"Эксперт" %}
+                                                selected {% endif %}
+                                                value="Эксперт">
+                                                Эксперт
                                             </option>
                                             <option {% if arguments.user|has_group:"Преподаватель" %}
                                                 selected {% endif %}

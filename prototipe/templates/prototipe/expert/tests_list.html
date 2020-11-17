@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Проверка тестов{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text"
+                                                                      aria-hidden="true"></i>Проверка тестов</li>
+{#                {% if arguments.test.test_name %}#}
+{#                    <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text"#}
+{#                                                          aria-hidden="true"></i><b>{{ arguments.test.predmet_id.predmet_name_sokr }}</b> {{ arguments.test.test_name }}#}
+{#                    </li>#}
+{#                {% endif %}#}
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Эксперт" %}
+            {% if arguments.error %}
+                <div class="alert alert-danger my_border">
+                    {{ arguments.error }}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if arguments.tests %}
+            <div class="my_border" style="background: white">
+                <table class="table table-sm table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Предмет</th>
+                        <th scope="col">Тест</th>
+                        <th scope="col">Дата действия</th>
+                        <th scope="col">Вопросов</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+
+                    {% for test in arguments.tests %}
+                        <tr onclick="window.location.href = '/expert/tests/{{ test.test_expert_id.id }}'">
+                            <th scope="row" data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.test_expert_id.test_id.predmet_id.predmet_name_sokr }}</th>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.test_expert_id.test_id.test_name }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.test_expert_id.test_id.valid_date }}</td>
+                            <td data-toggle="tooltip" data-placement="bottom"
+                                title="Нажмите для просмотра">{{ test.test_expert_id.test_id.voprosi_count }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Вы еще не были выданы тесты!
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}

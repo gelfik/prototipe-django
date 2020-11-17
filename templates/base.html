@@ -36,6 +36,14 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent" style="justify-content: flex-end;">
             <ul class="nav bg-dark">
                 {% if user.is_authenticated %}
+                    {% if user|has_group:"Эксперт" %}
+                        <li class="nav-item">
+                            <a class="nav-link text-white count_expert_tests" href="/expert/tests" id="count_expert_tests">Проверить
+                                тесты
+                            </a>
+                        </li>
+                    {% endif %}
+
                     {% if user|has_group:"Преподаватель" or user|has_group:"Администратор" %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" style="color:white" data-toggle="dropdown" role="button"
@@ -87,6 +95,7 @@
 {% block content %}{% endblock %}
 
 {{ STATIC_URL }}
+
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
         integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
@@ -95,5 +104,28 @@
         integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
         crossorigin="anonymous"></script>
 <script src="{% static 'js/js.js' %}"></script>
+{% if user.is_authenticated %}
+    <script>
+        function get_data(user_id) {
+            let r = {
+                url: '/user/auth/user/',
+                type: 'GET',
+                data: {user_id: user_id},
+                dataType: 'json',
+                success: function (request) {
+                    if (request['role'] == 'Эксперт') {
+                        $('.count_expert_tests').append('<span class="badge badge-light">' + request['count_expert_tests'] + '</span>')
+                    }
+                },
+                error: function (request) {
+                    console.log(request);
+                }
+            };
+            $.ajax(r);
+        }
+
+        get_data({{ user.id }});
+    </script>
+{% endif %}
 </body>
 </html>

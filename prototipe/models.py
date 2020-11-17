@@ -1,14 +1,24 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.aggregates import Count
+from django.utils.translation import gettext_lazy as _
 from random import randint
+
 from datetime import datetime, timedelta, time
 from django.utils import timezone
 
 from django.utils.timezone import now as django_datetime_now
 
 
-class RandomManager(models.Manager):
+class Test_Status_List(models.TextChoices):
+    Created = '0', _('Создание')
+    Review = '1', _('Отправлен на проверку')
+    ReCreated = '2', _('Не прошел проверку, внесите правки')
+    Published = '3', _('Опубликован')
+    Deleted = '4', _('Удален')
+
+
+class RandomManager_voprosi(models.Manager):
     def random(self, test_id):
         answer = None
         while answer == None:
@@ -18,11 +28,24 @@ class RandomManager(models.Manager):
                 answer = self.all().filter(test_id=test_id)[random_index]
             except Exception as e:
                 pass
-        print(answer)
+        return answer
+
+
+class RandomManager_expert_sciences(models.Manager):
+    def random(self, sciences_id):
+        answer = None
+        while answer == None:
+            count = self.aggregate(count=Count('id'))['count']
+            random_index = randint(0, count - 1)
+            try:
+                answer = self.all().filter(type_sciences_id=sciences_id)[random_index]
+            except Exception as e:
+                pass
         return answer
 
 class type_sciences(models.Model):
     sciences_name = models.CharField('Название науки', max_length=100, default=None)
+    expert_count = models.PositiveSmallIntegerField('Число экспертов', default=0)
 
     class Meta:
         verbose_name = 'Вид науки'
@@ -31,6 +54,7 @@ class type_sciences(models.Model):
 
     def __str__(self):
         return self.sciences_name
+
 
 class predmet(models.Model):
     predmet_name = models.CharField('Название предмета', max_length=256, default=None, unique=True)
@@ -71,6 +95,8 @@ class test(models.Model):
     voprosi_count = models.PositiveSmallIntegerField('Число вопросов', default=0, blank=True)
     decision_time = models.TimeField('Время на решение теста', default='01:00:00', blank=True)
     active_status = models.BooleanField('Статус публикации', default=False, blank=True)
+    status_test = models.CharField('Статус теста', choices=Test_Status_List.choices, default=Test_Status_List.Created,
+                              max_length=3, blank=True)
 
     class Meta:
         verbose_name = 'Тест'
@@ -91,7 +117,7 @@ class voprosi(models.Model):
     POL_score = models.FloatField('Исполнительская оценка', default=0)
     CHL_score = models.FloatField('Исполнительская оценка', default=0)
 
-    objects = RandomManager()
+    objects = RandomManager_voprosi()
 
     def save(self, *args, **kwargs):
         self.otvet = self.otvet.lower()
@@ -104,6 +130,36 @@ class voprosi(models.Model):
 
     def __str__(self):
         return self.vopros + ' ' + self.otvet
+
+
+class test_expert(models.Model):
+    test_id = models.ForeignKey(test, on_delete=models.CASCADE, verbose_name='Тест')
+    ocenka = models.PositiveSmallIntegerField('Средний балл', default=0, blank=True)
+    check_status = models.BooleanField('Статус проверки', default=False, blank=True)
+    override_status = models.BooleanField('Статус отправки на пересоставление теста', default=False, blank=True)
+
+    class Meta:
+        verbose_name = 'Экспертная проверка теста'
+        verbose_name_plural = 'Экспертная проверка тестов'
+        db_table = 'test_expert'
+
+    def __str__(self):
+        return f'{self.test_id}'
+
+class test_expert_for_user(models.Model):
+    test_expert_id = models.ForeignKey(test_expert, on_delete=models.CASCADE, verbose_name='Тест')
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Эксперт')
+    ocenka = models.PositiveSmallIntegerField('Оценка', default=0, blank=True)
+    check_status = models.BooleanField('Статус проверки', default=False, blank=True)
+    message = models.TextField('Рецензия', default='', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Экспертная проверка теста ответ эксперта'
+        verbose_name_plural = 'Экспертная проверка тестов ответы экспертов'
+        db_table = 'test_expert_for_user'
+
+    def __str__(self):
+        return f'{self.test_expert_id}'
 
 
 class test_for_user(models.Model):
@@ -146,6 +202,21 @@ class test_for_user_voprosi(models.Model):
 
     def __str__(self):
         return f'{self.otvet_user} - {self.otvet_status}'
+
+
+class expert_sciences(models.Model):
+    type_sciences_id = models.ForeignKey(type_sciences, on_delete=models.CASCADE, verbose_name='Наука', default=None)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
+
+    objects = RandomManager_expert_sciences()
+
+    class Meta:
+        verbose_name = 'Наука эксперта'
+        verbose_name_plural = 'Науки экспертов'
+        db_table = 'expert_sciences'
+
+    def __str__(self):
+        return f'{self.user_id} {self.type_sciences_id}'
 
 # class user_data(models.Model):
 #     last_name = models.CharField('Фамилия', max_length=50, default=None)

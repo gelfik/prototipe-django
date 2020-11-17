@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.template.context_processors import csrf
+
+from prototipe.models import test_expert_for_user
 from .forms import SignUpForm
 from django.views.generic import View
 from django.contrib.auth.models import Group
@@ -33,6 +35,22 @@ from userprofile.models import *
 #         else:
 #             arguments.update(form=bound_form)
 #             return render(request, 'myauth/register.html', {'arguments': arguments})
+
+def get_ocenka(all_count, valid_count):
+    return round((valid_count / all_count) * 100)
+
+
+def has_group(user, group_name):
+    from django.contrib.auth.models import Group
+    group = Group.objects.get(name=group_name)
+    return True if group in user.groups.all() else False
+
+
+def get_int(value):
+    try:
+        return int(value)
+    except:
+        return -1
 
 def login(request):
     arguments = {}
@@ -97,6 +115,28 @@ def register(request):
             return HttpResponse('405 Method Not Allowed', status=405)
     else:
         return redirect('/')
+
+def user(request):
+    arguments = {}
+    if request.method == 'GET':
+        if request.user.is_authenticated:
+            count_expert_tests=test_expert_for_user.objects.filter(user_id=request.user, check_status=False).count()
+            if has_group(request.user, 'Эксперт'):
+                arguments.update(role='Эксперт')
+                arguments.update(count_expert_tests=count_expert_tests)
+            elif has_group(request.user, 'Преподаватель'):
+                arguments.update(role='Преподаватель')
+            elif has_group(request.user, 'Администратор'):
+                arguments.update(role='Администратор')
+            else:
+                arguments.update(role='Пользователь')
+
+            return JsonResponse(arguments, status=200)
+        else:
+            return HttpResponse('', status=401)
+    else:
+        return HttpResponse('405 Method Not Allowed', status=405)
+
 
 # def register(request):
 #     arguments = {}

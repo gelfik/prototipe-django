@@ -34,6 +34,10 @@ urlpatterns = [
     re_path(r'^adm/users/([0-9]+)', views.user_look_admin),
     path('adm/users', views.users_list_admin),
 
+    re_path(r'^expert/tests/([0-9]+)/(answer)', views.user_manage_admin),
+    re_path(r'^expert/tests/([0-9]+)', views.expert_test_look),
+    path('expert/tests', views.expert_tests_list),
+
     path('tests', views.predmets_list),
     re_path(r'^tests/([A-z0-9]+)/([A-z0-9]+)/([A-z0-9]+)', views.test_for_test),
     re_path(r'^tests/([A-z0-9]+)/([A-z0-9]+)', views.test_for_test_generate),

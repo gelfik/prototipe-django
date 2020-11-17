@@ -55,10 +55,10 @@
                                 title="Нажмите для просмотра">{{ test.voprosi_count }}</td>
                             {% if test.active_status %}
                                 <td style="color: forestgreen" data-toggle="tooltip" data-placement="bottom"
-                                    title="Нажмите для просмотра">Опубликован
+                                    title="Нажмите для просмотра">{{ test.status_test|test_status }}
                                 </td> {% else %}
                                 <td style="color: red" data-toggle="tooltip" data-placement="bottom"
-                                    title="Нажмите для просмотра">Создание
+                                    title="Нажмите для просмотра">{{ test.status_test|test_status }}
                                 </td> {% endif %}
                             {% if user|has_group:"Администратор" %}
                                 <td data-toggle="tooltip" data-placement="bottom"

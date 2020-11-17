@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load tags_jinja %}
+{% block title %}Проверка тестов{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <nav aria-label="breadcrumb my_border">
+            <ol class="breadcrumb shadow">
+                <li class="breadcrumb-item active"><a href="/expert/tests"><i class="far fa-star mr-2 white-text"
+                                                                              aria-hidden="true"></i>Проверка тестов
+                </a></li>
+                {% if arguments.test.test_expert_id.test_id.test_name %}
+                    <li class="breadcrumb-item active"><i class="far fa-star mr-2 white-text"
+                                                          aria-hidden="true"></i><b>{{ arguments.test.test_expert_id.test_id.predmet_id.predmet_name_sokr }}</b> {{ arguments.test.test_expert_id.test_id.test_name }}
+                    </li>
+                {% endif %}
+            </ol>
+        </nav>
+
+        {% if user|has_group:"Эксперт" %}
+            {% if arguments.error %}
+                <div class="alert alert-danger my_border">
+                    {{ arguments.error }}
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if arguments.test %}
+            <div class="container my_border modal-body" style="background: white">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h4>{{ arguments.test.test_expert_id.test_id.test_name }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <h5>Предмет: <b>{{ arguments.test.test_expert_id.test_id.predmet_id.predmet_name }}</b></h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Наука: <b>{{ arguments.test.test_expert_id.test_id.predmet_id.type_sciences_id.sciences_name }}</b></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Тест действителен до: <b>{{ arguments.test.test_expert_id.test_id.valid_date }}</b></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Тест создал:
+                            <b>{{ arguments.test.test_expert_id.test_id.create_user_id.last_name }} {{ arguments.test.test_expert_id.test_id.create_user_id.first_name }} {{ arguments.test.test_expert_id.test_id.create_user_id.userprofile.patronymic }}</b>
+                        </span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <span class="text">Выборка из <b>{{ arguments.test.test_expert_id.test_id.voprosi_count }}шт. </b>вопросов</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        {% if arguments.test.test_expert_id.test_id.active_status %}
+                            <h4>
+                                Статус теста:
+                                <span style="color: forestgreen">{{ arguments.test.test_expert_id.test_id.status_test|test_status }}</span>
+                            </h4>
+                        {% else %}
+                            <h4>
+                                Статус теста:
+                                <span class="font-weight-bold"
+                                      style="color: red">{{ arguments.test.test_expert_id.test_id.status_test|test_status }}</span>
+                            </h4>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if arguments.voprosi|cheak_count_list > 0 %}
+                <div class="my_border modal-body" style="background: white">
+                    <table class="table table-sm table-hover">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">№</th>
+                            <th scope="col">Вопрос</th>
+                            <th scope="col">Ответ</th>
+                            <th scope="col">A</th>
+                            <th scope="col">B</th>
+                            <th scope="col">C</th>
+                            <th scope="col">POL</th>
+                            <th scope="col">CHL</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for vopros in arguments.voprosi %}
+                            <tr>
+                                <th scope="row">{{ forloop.counter }}</th>
+                                <td>{{ vopros.vopros }}</td>
+                                <td>{{ vopros.otvet }}</td>
+                                <td>{{ vopros.A_score }}</td>
+                                <td>{{ vopros.B_score }}</td>
+                                <td>{{ vopros.C_score }}</td>
+                                <td>{{ vopros.POL_score }}</td>
+                                <td>{{ vopros.CHL_score }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-danger my_border">
+                    <p class="text">Вопросы еще не добавлены в тест!</p>
+                </div>
+            {% endif %}
+            {% if not arguments.test.check_status %}
+                <div class="my_border" style="background: white">
+                    <form method="post" action="/expert/tests/{{ arguments.test.test_expert_id.id }}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="ocenka">Оценка, 0 - Не публикуем, 10 - Публикуем</label>
+                                <select class="form-control" id="ocenka" name="ocenka">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="review">Ваша рецензия на тест:</label>
+                                <textarea class="form-control" id="review" name="review"
+                                          placeholder="Рецензия" rows="5"></textarea>
+                            </div>
+
+                            <div class="form-row align-items-center justify-content-center">
+                                <button type="submit" class="btn btn-danger">Отправить</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <div class="my_border" style="background: white">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col">
+                                <span class="text">Ваша оценка: <b>{{ arguments.test.ocenka }}</b></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <span class="text">Ваша рецензия: <b>{{ arguments.test.message }}</b></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-danger my_border">
+                Тест не найден!
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}

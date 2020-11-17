@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import type_sciences, test, predmet, voprosi, test_for_user, test_for_user_voprosi
+from .models import type_sciences, test, predmet, voprosi, test_for_user, test_for_user_voprosi, test_expert, \
+    test_expert_for_user, expert_sciences
 from .forms import CreateTestForUserForm
 from datetime import datetime, timedelta, time
 from django.utils import timezone
@@ -106,6 +107,12 @@ def get_user_all_stats(user_id):
 #                 round(Sum[4] / Sum_all[4] * 100, 1)]
 #     except:
 #         return [0, 0, 0, 0, 0]
+
+def get_ocenka_test(ocenka):
+    if 0 < ocenka < 7:
+        return False
+    else:
+        return True
 
 def get_ocenka(all_count, valid_count):
     return round((valid_count / all_count) * 100)
@@ -438,18 +445,23 @@ def tests_admin_look(request, test_id):
         if request.method == 'GET':
             if has_group(request.user, 'Администратор'):
                 try:
-                    arguments.update(test=test.objects.get(id=test_id))
-                    arguments.update(voprosi=voprosi.objects.filter(test_id=test_id))
+                    test_object = test.objects.get(id=test_id)
                 except:
                     arguments.update(error='Тест не найден!')
             elif has_group(request.user, 'Преподаватель'):
                 try:
-                    arguments.update(test=test.objects.get(id=test_id, create_user_id=request.user))
-                    arguments.update(voprosi=voprosi.objects.filter(test_id=test_id))
+                    test_object = test.objects.get(id=test_id, create_user_id=request.user)
                 except:
                     arguments.update(error='Тест не найден или его создали не вы!')
             else:
                 arguments.update(error='Тест не найден!')
+            try:
+                arguments.update(test=test_object)
+                arguments.update(voprosi=voprosi.objects.filter(test_id=test_object))
+                test_expert_object = test_expert.objects.get(test_id=test_object)
+                arguments.update(experts=test_expert_for_user.objects.filter(test_expert_id=test_expert_object))
+            except:
+                pass
             return render(request, 'prototipe/admin/test.html', {'arguments': arguments})
         else:
             return HttpResponse('405 Method Not Allowed', status=405)
@@ -714,8 +726,30 @@ def tests_admin_edit_test(request, test_id, query_type):
                 return render(request, 'prototipe/admin/test.html', {'arguments': arguments})
             else:
                 test_object = test.objects.get(id=test_id)
-                test_object.active_status = True
-                test_object.save()
+                # test_object.active_status = True
+                try:
+                    if int(test_object.status_test) == 0 or int(test_object.status_test) == 2:
+                        test_expert_object = test_expert(test_id=test_object)
+                        test_expert_object.save()
+                        i = 0
+                        count_expert = type_sciences.objects.get(
+                            id=test_object.predmet_id.type_sciences_id.id).expert_count
+                        while i < count_expert:
+                            expert_object = expert_sciences.objects.random(test_object.predmet_id.type_sciences_id.id)
+                            try:
+                                test_expert_for_user.objects.get(test_expert_id=test_expert_object,
+                                                                 user_id=expert_object.user_id)
+                            except:
+                                test_expert_for_user_object = test_expert_for_user(test_expert_id=test_expert_object,
+                                                                                   user_id=expert_object.user_id)
+                                test_expert_for_user_object.save()
+                                i += 1
+
+                        test_object.status_test = 1
+                        test_object.save()
+                except Exception as e:
+                    print(e)
+
                 return redirect(f'/adm/tests/{test_id}')
 
         if request.method == 'POST' and query_type == 'delTest':
@@ -869,6 +903,7 @@ def user_look_admin(request, user_id):
         if request.method == 'GET':
             try:
                 arguments.update(user=User.objects.get(id=user_id))
+                arguments.update(expert_data=expert_sciences.objects.filter(user_id=user_id))
                 arguments.update(marksCanvas_data=get_user_all_stats(user_id))
                 arguments.update(tests=test_for_user.objects.filter(user_id=user_id))
             except:
@@ -947,6 +982,93 @@ def user_manage_admin(request, user_id, query_type):
                 if user_search:
                     user_object.delete()
                 return redirect(f'/adm/users')
+        else:
+            return HttpResponse('405 Method Not Allowed', status=405)
+    else:
+        return redirect('/')
+
+
+# TODO: EXPERT tests views
+def expert_tests_list(request):
+    arguments = {}
+    if request.user.is_authenticated and has_group(request.user, 'Эксперт'):
+        if request.method == 'GET':
+            test_expert_for_user_object = test_expert_for_user.objects.filter(user_id=request.user, check_status=False)
+            arguments.update(tests=test_expert_for_user_object)
+            return render(request, 'prototipe/expert/tests_list.html', {'arguments': arguments})
+        else:
+            return HttpResponse('405 Method Not Allowed', status=405)
+    else:
+        return redirect('/')
+
+
+def expert_test_look(request, test_id):
+    arguments = {}
+    err = False
+    if request.user.is_authenticated and has_group(request.user, 'Эксперт'):
+        if request.method == 'GET':
+            try:
+                test_expert_for_user_object = test_expert_for_user.objects.get(test_expert_id=test_id,
+                                                                               user_id=request.user)
+                arguments.update(test=test_expert_for_user_object)
+                arguments.update(
+                    voprosi=voprosi.objects.filter(test_id=test_expert_for_user_object.test_expert_id.test_id))
+            except:
+                arguments.update(error='Тест не найден!')
+            return render(request, 'prototipe/expert/test.html', {'arguments': arguments})
+        elif request.method == 'POST':
+            review = request.POST.get('review', False)
+            ocenka = request.POST.get('ocenka', False)
+
+            try:
+                test_expert_for_user_object = test_expert_for_user.objects.get(test_expert_id=test_id,
+                                                                               user_id=request.user)
+                arguments.update(test=test_expert_for_user_object)
+                arguments.update(
+                    voprosi=voprosi.objects.filter(test_id=test_expert_for_user_object.test_expert_id.test_id))
+            except:
+                err = True
+                arguments.update(error='Тест не найден или уже оценен!')
+            if review and get_int(ocenka) > 0:
+                if not err:
+                    test_expert_for_user_object.ocenka = get_int(ocenka)
+                    test_expert_for_user_object.message = review
+                    test_expert_for_user_object.check_status = True
+                    test_expert_for_user_object.save()
+
+                    test_expert_object = test_expert.objects.get(id=test_expert_for_user_object.test_expert_id.id)
+                    test_expert_for_user_objects = test_expert_for_user.objects.filter(test_expert_id=test_expert_object)
+                    validate_status = True
+                    ocenka_sum = 0
+                    expert_count = 0
+                    for i, item in enumerate(test_expert_for_user_objects):
+                        if not item.check_status:
+                            validate_status = False
+                        ocenka_sum += get_int(item.ocenka)
+                        expert_count += 1
+
+                    if validate_status:
+                        new_ocenka_test = round(ocenka_sum / expert_count)
+                        override_status = get_ocenka_test(new_ocenka_test)
+                        test_expert_object.ocenka = new_ocenka_test
+                        test_expert_object.check_status = True
+
+                        test_object = test.objects.get(id=test_expert_object.test_id.id)
+                        if override_status:
+                            test_object.status_test = 3
+                            test_object.active_status = True
+                        else:
+                            test_expert_object.override_status = True
+                            test_object.status_test = 2
+                        test_expert_object.save()
+                        test_object.save()
+            else:
+                err = True
+                arguments.update(error='Поле рецензии или оценки заполнены не корректно!')
+            if err:
+                return render(request, 'prototipe/expert/test.html', {'arguments': arguments})
+            else:
+                return redirect(f'/expert/tests/{test_id}')
         else:
             return HttpResponse('405 Method Not Allowed', status=405)
     else:

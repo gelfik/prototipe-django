@@ -38,3 +38,41 @@ def to_js(data):
     for i in data:
         local_data.append(i)
     return local_data
+
+@register.filter(name='test_status')
+def test_status(data):
+    try:
+        ocenka = int(data)
+        if ocenka == 0:
+            return 'Создание'
+        elif ocenka == 1:
+            return 'Отправлен на проверку'
+        elif ocenka == 2:
+            return 'Не прошел проверку, внесите правки'
+        elif ocenka == 3:
+            return 'Опубликован'
+        elif ocenka == 4:
+            return 'Удален'
+        else:
+            return 'Ошибка получения статуса'
+    except:
+        return 'Ошибка получения статуса'
+
+@register.filter(name='access_edit')
+def test_status(data):
+    try:
+        ocenka = int(data)
+        if ocenka == 0:
+            return True
+        elif ocenka == 1:
+            return False
+        elif ocenka == 2:
+            return True
+        elif ocenka == 3:
+            return False
+        elif ocenka == 4:
+            return False
+        else:
+            return False
+    except:
+        return False

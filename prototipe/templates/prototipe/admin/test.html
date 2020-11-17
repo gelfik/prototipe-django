@@ -27,15 +27,8 @@
         {% if arguments.test %}
             <div class="container my_border" style="background: white">
                 <div class="row align-items-center">
-                    <div class="col-10">
+                    <div class="col">
                         <h4>{{ arguments.test.test_name }}</h4>
-                    </div>
-                    <div class="col-2 align-self-center">
-                        {% if arguments.test.active_status %}
-                            <h4 style="color: forestgreen">Опубликован</h4>
-                        {% else %}
-                            <h4 class="font-weight-bold" style="color: red">Создание</h4>
-                        {% endif %}
                     </div>
                 </div>
                 <div class="row">
@@ -65,9 +58,25 @@
                         <span class="text">Выборка из <b>{{ arguments.test.voprosi_count }}шт. </b>вопросов</span>
                     </div>
                 </div>
+                <div class="row">
+                    <div class="col">
+                        {% if arguments.test.active_status %}
+                            <h4>
+                                Статус теста:
+                                <span style="color: forestgreen">{{ arguments.test.status_test|test_status }}</span>
+                            </h4>
+                        {% else %}
+                            <h4>
+                                Статус теста:
+                                <span class="font-weight-bold"
+                                      style="color: red">{{ arguments.test.status_test|test_status }}</span>
+                            </h4>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
 
-            {% if not arguments.test.active_status %}
+            {% if arguments.test.status_test|access_edit %}
                 <div class="row">
                     <div class="col-6">
                         <button type="button" class="btn btn-danger btn-block my_border" role="button"
@@ -80,7 +89,7 @@
                         <button type="button" class="btn btn-danger btn-block my_border" role="button"
                                 data-toggle="modal"
                                 data-target="#PublicTestModal">
-                            Опубликовать
+                            Отправить на проверку
                         </button>
                     </div>
                 </div>
@@ -111,10 +120,11 @@
             {% endif %}
 
             {% if arguments.voprosi|cheak_count_list > 0 %}
-                <div class="my_border" style="background: white">
+                <div class="my_border modal-body" style="background: white">
                     <table class="table table-sm table-hover">
                         <thead class="thead-dark">
                         <tr>
+                            <th scope="col">№</th>
                             <th scope="col">Вопрос</th>
                             <th scope="col">Ответ</th>
                             <th scope="col">A</th>
@@ -126,10 +136,12 @@
                         </thead>
                         <tbody>
                         {% for vopros in arguments.voprosi %}
-                            {% if not arguments.test.active_status %}
+                            {% if arguments.test.status_test|access_edit %}
                                 <tr role="button" data-toggle="modal" data-target="#EditModal_{{ vopros.id }}">
                                     <th scope="row" data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для редактирования">{{ vopros.vopros }}</th>
+                                        title="Нажмите для редактирования">{{ forloop.counter }}</th>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для редактирования">{{ vopros.vopros }}</td>
                                     <td data-toggle="tooltip" data-placement="bottom"
                                         title="Нажмите для редактирования">{{ vopros.otvet }}</td>
                                     <td data-toggle="tooltip" data-placement="bottom"
@@ -145,7 +157,8 @@
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <th scope="row">{{ vopros.vopros }}</th>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ vopros.vopros }}</td>
                                     <td>{{ vopros.otvet }}</td>
                                     <td>{{ vopros.A_score }}</td>
                                     <td>{{ vopros.B_score }}</td>
@@ -163,10 +176,45 @@
                     <p class="text">Вопросы еще не добавлены в тест!</p>
                 </div>
             {% endif %}
+
+            {% if arguments.test.status_test == '2' and  arguments.experts|cheak_count_list > 0 %}
+                <div class="my_border" style="background: white">
+                    <div class="modal-body">
+                        <div class="accordion" id="accordionASK">
+                            {% for expert in arguments.experts %}
+                                <div class="card">
+                                    <div class="card-header" id="heading_ask_{{ forloop.counter }}">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                                    data-target="#collapse_ask_{{ forloop.counter }}"
+                                                    aria-expanded="false"
+                                                    aria-controls="collapse_ask_{{ forloop.counter }}">
+                                                Эксперт №{{ forloop.counter }}
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div id="collapse_ask_{{ forloop.counter }}" class="collapse"
+                                         aria-labelledby="heading_ask_{{ forloop.counter }}"
+                                         data-parent="#accordionASK">
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <span class="text">Оценка: <b>{{ expert.ocenka }}</b></span>
+                                            </div>
+                                            <div class="form-group">
+                                                <span class="text">Рецензия: <b>{{ expert.message }}</b></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         {% endif %}
     </div>
 
-    {% if not arguments.test.active_status %}
+    {% if arguments.test.status_test|access_edit %}
         <!-- Add Modal -->
         <div class="modal fade" id="AddModal" tabindex="-1" role="dialog" aria-labelledby="AddModalLabel"
              aria-hidden="true">
@@ -281,109 +329,108 @@
                 </div>
             </div>
         </div>
-    {% endif %}
 
 
-    {% if arguments.voprosi and not arguments.test.active_status %}
-        {% for vopros in arguments.voprosi %}
-            <!-- Edit Vopros Modal {{ vopros.id }} -->
-            <div class="modal fade" id="EditModal_{{ vopros.id }}" tabindex="-1" role="dialog"
-                 aria-labelledby="EditModalLabel_{{ vopros.id }}"
-                 aria-hidden="true">
-                <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="EditModalLabel_{{ vopros.id }}">Редактирование вопроса</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <form action="/adm/tests/{{ arguments.test.id }}/editVopros">
-                            {% csrf_token %}
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="vopros_{{ vopros.id }}">Вопрос</label>
-                                    <input type="text" class="form-control" id="vopros_{{ vopros.id }}"
-                                           name="vopros_{{ vopros.id }}"
-                                           placeholder="Вопрос" value="{{ vopros.vopros }}">
-                                </div>
-                                <div class="form-group">
-                                    <label for="otvet_{{ vopros.id }}">Ответ</label>
-                                    <input type="text" class="form-control" id="otvet_{{ vopros.id }}"
-                                           name="otvet_{{ vopros.id }}"
-                                           placeholder="Ответ"
-                                           value="{{ vopros.otvet }}">
-                                </div>
-                                <p style="color: orangered;">Учтите что A+B+C=100</p>
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-3">
-                                            <label for="a_{{ vopros.id }}">A</label>
-                                            <input type="number" class="form-control" id="a_{{ vopros.id }}"
-                                                   name="a_{{ vopros.id }}" min="0"
-                                                   max="100" value="{{ vopros.A_score|get_int }}"
-                                                   onchange="InputMinMax(this);Edit_Sum_ABC({{ vopros.id }});">
-                                        </div>
-                                        <div class="col-3">
-                                            <label for="b_{{ vopros.id }}">B</label>
-                                            <input type="number" class="form-control" id="b_{{ vopros.id }}"
-                                                   name="b_{{ vopros.id }}" min="0"
-                                                   max="100" value="{{ vopros.B_score|get_int }}"
-                                                   onchange="InputMinMax(this);Edit_Sum_ABC({{ vopros.id }});">
-                                        </div>
-                                        <div class="col-3">
-                                            <label for="c_{{ vopros.id }}">C</label>
-                                            <input type="number" class="form-control" id="c_{{ vopros.id }}"
-                                                   name="c_{{ vopros.id }}" min="0"
-                                                   max="100" value="{{ vopros.C_score|get_int }}"
-                                                   onchange="InputMinMax(this);Edit_Sum_ABC({{ vopros.id }});">
-                                        </div>
-                                        <div class="col-3">
-                                            <label for="sum_a_b_c_{{ vopros.id }}">Сумма</label>
-                                            <input type="number" class="form-control" id="sum_a_b_c_{{ vopros.id }}"
-                                                   min="0"
-                                                   max="100"
-                                                   value="100" readonly onchange="InputMinMax(this);">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div id="error_edit_vopros_{{ vopros.id }}"></div>
-                                <div class="form-group">
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <label for="pol_{{ vopros.id }}">POL</label>
-                                            <input type="number" class="form-control" id="pol_{{ vopros.id }}"
-                                                   name="pol_{{ vopros.id }}"
-                                                   min="0"
-                                                   max="100" value="{{ vopros.POL_score|get_int }}"
-                                                   onchange="InputMinMax(this);">
-                                        </div>
-                                        <div class="col-6">
-                                            <label for="chl_{{ vopros.id }}">CHL</label>
-                                            <input type="number" class="form-control" id="chl_{{ vopros.id }}"
-                                                   name="chl_{{ vopros.id }}"
-                                                   min="0"
-                                                   max="100" value="{{ vopros.CHL_score|get_int }}"
-                                                   onchange="InputMinMax(this);">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button formmethod="get" type="submit" class="btn btn-danger">Удалить</button>
-                                <button formmethod="post" type="submit" class="btn btn-primary"
-                                        id="edit_vopros_submit_{{ vopros.id }}">Сохранить
+        {% if arguments.voprosi %}
+            {% for vopros in arguments.voprosi %}
+                <!-- Edit Vopros Modal {{ vopros.id }} -->
+                <div class="modal fade" id="EditModal_{{ vopros.id }}" tabindex="-1" role="dialog"
+                     aria-labelledby="EditModalLabel_{{ vopros.id }}"
+                     aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="EditModalLabel_{{ vopros.id }}">Редактирование вопроса</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
                                 </button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                             </div>
-                        </form>
+                            <form action="/adm/tests/{{ arguments.test.id }}/editVopros">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <div class="form-group">
+                                        <label for="vopros_{{ vopros.id }}">Вопрос</label>
+                                        <input type="text" class="form-control" id="vopros_{{ vopros.id }}"
+                                               name="vopros_{{ vopros.id }}"
+                                               placeholder="Вопрос" value="{{ vopros.vopros }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="otvet_{{ vopros.id }}">Ответ</label>
+                                        <input type="text" class="form-control" id="otvet_{{ vopros.id }}"
+                                               name="otvet_{{ vopros.id }}"
+                                               placeholder="Ответ"
+                                               value="{{ vopros.otvet }}">
+                                    </div>
+                                    <p style="color: orangered;">Учтите что A+B+C=100</p>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <label for="a_{{ vopros.id }}">A</label>
+                                                <input type="number" class="form-control" id="a_{{ vopros.id }}"
+                                                       name="a_{{ vopros.id }}" min="0"
+                                                       max="100" value="{{ vopros.A_score|get_int }}"
+                                                       onchange="InputMinMax(this);Edit_Sum_ABC({{ vopros.id }});">
+                                            </div>
+                                            <div class="col-3">
+                                                <label for="b_{{ vopros.id }}">B</label>
+                                                <input type="number" class="form-control" id="b_{{ vopros.id }}"
+                                                       name="b_{{ vopros.id }}" min="0"
+                                                       max="100" value="{{ vopros.B_score|get_int }}"
+                                                       onchange="InputMinMax(this);Edit_Sum_ABC({{ vopros.id }});">
+                                            </div>
+                                            <div class="col-3">
+                                                <label for="c_{{ vopros.id }}">C</label>
+                                                <input type="number" class="form-control" id="c_{{ vopros.id }}"
+                                                       name="c_{{ vopros.id }}" min="0"
+                                                       max="100" value="{{ vopros.C_score|get_int }}"
+                                                       onchange="InputMinMax(this);Edit_Sum_ABC({{ vopros.id }});">
+                                            </div>
+                                            <div class="col-3">
+                                                <label for="sum_a_b_c_{{ vopros.id }}">Сумма</label>
+                                                <input type="number" class="form-control" id="sum_a_b_c_{{ vopros.id }}"
+                                                       min="0"
+                                                       max="100"
+                                                       value="100" readonly onchange="InputMinMax(this);">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="error_edit_vopros_{{ vopros.id }}"></div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="pol_{{ vopros.id }}">POL</label>
+                                                <input type="number" class="form-control" id="pol_{{ vopros.id }}"
+                                                       name="pol_{{ vopros.id }}"
+                                                       min="0"
+                                                       max="100" value="{{ vopros.POL_score|get_int }}"
+                                                       onchange="InputMinMax(this);">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="chl_{{ vopros.id }}">CHL</label>
+                                                <input type="number" class="form-control" id="chl_{{ vopros.id }}"
+                                                       name="chl_{{ vopros.id }}"
+                                                       min="0"
+                                                       max="100" value="{{ vopros.CHL_score|get_int }}"
+                                                       onchange="InputMinMax(this);">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button formmethod="get" type="submit" class="btn btn-danger">Удалить</button>
+                                    <button formmethod="post" type="submit" class="btn btn-primary"
+                                            id="edit_vopros_submit_{{ vopros.id }}">Сохранить
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
-    {% endif %}
+            {% endfor %}
+        {% endif %}
 
-    {% if arguments.test %}
         <!-- Del Test Modal -->
         <div class="modal fade" id="DelTestModal" tabindex="-1" role="dialog"
              aria-labelledby="DelTestModalLabel"
@@ -420,61 +467,64 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="PublicTestModalLabel">Удаление теста</h5>
+                        <h5 class="modal-title" id="PublicTestModalLabel">Отправить на проверку</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
-                    <form method="post" action="/adm/tests/{{ arguments.test.id }}/publicTest" id="delForm">
+                    <form method="post" action="/adm/tests/{{ arguments.test.id }}/publicTest" id="PublicForm">
                         {% csrf_token %}
                         <div class="modal-body">
                             <div class="form-group">
-                                <p class="test">Если вы опубликуете тест, в него уже нельзя будет вносить изменения и
+                                <p class="test">Если вы отправите тест на проверку, в него уже нельзя будет вносить
+                                    изменения и
                                     правки!<br><br>
-                                    Еще раз проверьте тест перед публикацией!</p>
+                                    Еще раз проверьте тест перед отправкой!</p>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="submit" class="btn btn-danger">Опубликовать</button>
+                            <button type="submit" class="btn btn-danger">Отправить на проверку</button>
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+
+
+        <script>
+            function InputMinMax(input) {
+                if (input.value < 0) input.value = 0;
+                if (input.value > 100) input.value = 100;
+            }
+
+            function Sum_ABC() {
+                let a = Number($("#new_a").val()), b = Number($("#new_b").val()), c = Number($("#new_c").val());
+                if ((a + b + c) === 100) {
+                    $("#new_sum_a_b_c").val(a + b + c);
+                    $("#error_add_vopros").empty();
+                    $("#add_vopros_submit").prop('disabled', false);
+                } else {
+                    $("#new_sum_a_b_c").val(a + b + c);
+                    $("#error_add_vopros").empty();
+                    $("#error_add_vopros").append('<p style="color: red;">Ошибка: A+B+C≠100</p>');
+                    $("#add_vopros_submit").prop('disabled', true);
+                }
+            }
+
+            function Edit_Sum_ABC(id) {
+                let a = Number($("#a_" + id).val()), b = Number($("#b_" + id).val()), c = Number($("#c_" + id).val());
+                if ((a + b + c) === 100) {
+                    $("#sum_a_b_c_" + id).val(a + b + c);
+                    $("#error_edit_vopros_" + id).empty();
+                    $("#edit_vopros_submit_" + id).prop('disabled', false);
+                } else {
+                    $("#sum_a_b_c_" + id).val(a + b + c);
+                    $("#error_edit_vopros_" + id).empty();
+                    $("#error_edit_vopros_" + id).append('<p style="color: red;">Ошибка: A+B+C≠100</p>');
+                    $("#edit_vopros_submit_" + id).prop('disabled', true);
+                }
+            }
+        </script>
     {% endif %}
-    <script>
-        function InputMinMax(input) {
-            if (input.value < 0) input.value = 0;
-            if (input.value > 100) input.value = 100;
-        }
-
-        function Sum_ABC() {
-            let a = Number($("#new_a").val()), b = Number($("#new_b").val()), c = Number($("#new_c").val());
-            if ((a + b + c) === 100) {
-                $("#new_sum_a_b_c").val(a + b + c);
-                $("#error_add_vopros").empty();
-                $("#add_vopros_submit").prop('disabled', false);
-            } else {
-                $("#new_sum_a_b_c").val(a + b + c);
-                $("#error_add_vopros").empty();
-                $("#error_add_vopros").append('<p style="color: red;">Ошибка: A+B+C≠100</p>');
-                $("#add_vopros_submit").prop('disabled', true);
-            }
-        }
-
-        function Edit_Sum_ABC(id) {
-            let a = Number($("#a_" + id).val()), b = Number($("#b_" + id).val()), c = Number($("#c_" + id).val());
-            if ((a + b + c) === 100) {
-                $("#sum_a_b_c_" + id).val(a + b + c);
-                $("#error_edit_vopros_" + id).empty();
-                $("#edit_vopros_submit_" + id).prop('disabled', false);
-            } else {
-                $("#sum_a_b_c_" + id).val(a + b + c);
-                $("#error_edit_vopros_" + id).empty();
-                $("#error_edit_vopros_" + id).append('<p style="color: red;">Ошибка: A+B+C≠100</p>');
-                $("#edit_vopros_submit_" + id).prop('disabled', true);
-            }
-        }
-    </script>
 {% endblock %}

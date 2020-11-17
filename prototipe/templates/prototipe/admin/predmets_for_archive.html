@@ -46,9 +46,9 @@
                             <td data-toggle="tooltip" data-placement="bottom"
                                 title="Нажмите для просмотра">
                                 {% if test.active_status %}
-                                    <span style="font-weight: bold; color: forestgreen">Опубликован</span>
+                                    <span style="font-weight: bold; color: forestgreen">{{ test.status_test|test_status }}</span>
                                 {% else %}
-                                    <span style="color: red">Создание</span>
+                                    <span style="color: red">{{ test.status_test|test_status }}</span>
                                 {% endif %}
                             </td>
                             {% if user|has_group:"Администратор" %}
