@@ -3,7 +3,47 @@
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-    <div class="container">
-        {{ user }} {{ user.groups.all.0.name }} {{ group }}
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">Демо-сайт «Тестовая оболочка»</h1>
+            <p class="lead">Этот сайт был разработан в качестве лабораторной работы.</p>
+            <hr class="my-4">
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Роль</th>
+                    <th scope="col">Логин</th>
+                    <th scope="col">Пароль</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Пользователь</td>
+                    <td>user</td>
+                    <td>user</td>
+                </tr>
+                <tr>
+                    <td>Преподаватель</td>
+                    <td>teacher</td>
+                    <td>teacher</td>
+                </tr>
+                <tr>
+                    <td>Эксперт №1</td>
+                    <td>expert1</td>
+                    <td>expert1</td>
+                </tr>
+                <tr>
+                    <td>Эксперт №2</td>
+                    <td>expert2</td>
+                    <td>expert2</td>
+                </tr>
+                <tr>
+                    <td>Администратор</td>
+                    <td>admin</td>
+                    <td>admin</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 {% endblock %}
