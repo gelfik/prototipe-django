@@ -71,6 +71,11 @@
                                     data-target="#EditModal">
                                 Редактировать данные
                             </button>
+                            <button type="button" class="btn btn-dark btn-block my_border" role="button"
+                                    data-toggle="modal"
+                                    data-target="#SetExpertModal">
+                                Назначить экспертом
+                            </button>
                             <button type="button" class="btn btn-danger btn-block my_border" role="button"
                                     data-toggle="modal"
                                     data-target="#DelModal">
@@ -133,56 +138,58 @@
                         </thead>
                         <tbody>
 
-                        {% for test in arguments.tests %}
-                            <tr onclick="window.location.href = '/adm/archive/{{ test.test_id.id }}/{{ test.id }}'">
-                                <th scope="row" data-toggle="tooltip" data-placement="bottom"
-                                    title="Нажмите для просмотра">{{ test.test_id.predmet_id.predmet_name_sokr }}</th>
-                                <td data-toggle="tooltip" data-placement="bottom"
-                                    title="Нажмите для просмотра">{{ test.test_id.test_name }}</td>
+                        {% if arguments.tests|cheak_count_list > 0 %}
+                            {% for test in arguments.tests %}
+                                <tr onclick="window.location.href = '/adm/archive/{{ test.test_id.id }}/{{ test.id }}'">
+                                    <th scope="row" data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">{{ test.test_id.predmet_id.predmet_name_sokr }}</th>
+                                    <td data-toggle="tooltip" data-placement="bottom"
+                                        title="Нажмите для просмотра">{{ test.test_id.test_name }}</td>
 
-                                {% if test.end_status %}
-                                    {% if test.override_status %}
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span>{{ test.end_time }}</span>
-                                        </td>
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span>{{ test.ocenka }}%</span>
-                                        </td>
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span>Сдан</span>
-                                        </td>
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span style="color: red">Пересдача</span>
-                                        </td>
+                                    {% if test.end_status %}
+                                        {% if test.override_status %}
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span>{{ test.end_time }}</span>
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span>{{ test.ocenka }}%</span>
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span>Сдан</span>
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span style="color: red">Пересдача</span>
+                                            </td>
+                                        {% else %}
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span style="color: forestgreen; font-weight: bold">Сдан</span>
+                                            </td>
+                                            <td data-toggle="tooltip" data-placement="bottom"
+                                                title="Нажмите для просмотра">
+                                                <span style="color: forestgreen; font-weight: bold">Засчитан</span>
+                                            </td>
+                                        {% endif %}
                                     {% else %}
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span style="color: forestgreen; font-weight: bold">{{ test.end_time }}</span>
-                                        </td>
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span style="color: forestgreen; font-weight: bold">{{ test.ocenka }}%</span>
-                                        </td>
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span style="color: forestgreen; font-weight: bold">Сдан</span>
-                                        </td>
-                                        <td data-toggle="tooltip" data-placement="bottom"
-                                            title="Нажмите для просмотра">
-                                            <span style="color: forestgreen; font-weight: bold">Засчитан</span>
+                                        <td colspan="4" data-toggle="tooltip" data-placement="bottom"
+                                            title="Нажмите для просмотра" style="text-align: center">Решение
                                         </td>
                                     {% endif %}
-                                {% else %}
-                                    <td colspan="4" data-toggle="tooltip" data-placement="bottom"
-                                        title="Нажмите для просмотра" style="text-align: center">Решение
-                                    </td>
-                                {% endif %}
-                            </tr>
-                        {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
                         </tbody>
                     </table>
                 </div>
@@ -272,11 +279,13 @@
                                                 value="Пользователь">
                                                 Пользователь
                                             </option>
-                                            <option {% if arguments.user|has_group:"Эксперт" %}
-                                                selected {% endif %}
-                                                value="Эксперт">
-                                                Эксперт
-                                            </option>
+                                            {% if arguments.user|has_group:"Эксперт" %}
+                                                <option
+                                                        selected
+                                                        value="Эксперт">
+                                                    Эксперт
+                                                </option>
+                                            {% endif %}
                                             <option {% if arguments.user|has_group:"Преподаватель" %}
                                                 selected {% endif %}
                                                 value="Преподаватель">
@@ -366,5 +375,42 @@
                 </div>
             </div>
         </div>
+
+        {% if arguments.sciences|cheak_count_list > 0 %}
+            <!-- Set Expert User Modal -->
+            <div class="modal fade" id="SetExpertModal" tabindex="-1" role="dialog"
+                 aria-labelledby="SetExpertModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="SetExpertModalLabel">Удаление пользователя</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form method="post" action="/adm/users/{{ arguments.user.id }}/setExpert">
+                            {% csrf_token %}
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="sciences_name">Наука</label>
+                                    <select class="form-control" id="sciences_name" name="sciences_name">
+                                        {% for science in arguments.sciences %}
+                                            <option value="{{ science.sciences_name }}">
+                                                {{ science.sciences_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-danger" formmethod="post">Назначить</button>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     {% endif %}
 {% endblock %}

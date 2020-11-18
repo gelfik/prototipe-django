@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import type_sciences, test, predmet, voprosi, test_for_user, test_for_user_voprosi, test_expert, \
-    test_expert_for_user, expert_sciences
+from .models import type_sciences, test, predmet, voprosi, test_for_user, test_for_user_voprosi, test_expert, test_expert_for_user, expert_sciences
 from .forms import CreateTestForUserForm
 from datetime import datetime, timedelta, time
 from django.utils import timezone
@@ -903,9 +902,10 @@ def user_look_admin(request, user_id):
         if request.method == 'GET':
             try:
                 arguments.update(user=User.objects.get(id=user_id))
-                arguments.update(expert_data=expert_sciences.objects.filter(user_id=user_id))
                 arguments.update(marksCanvas_data=get_user_all_stats(user_id))
                 arguments.update(tests=test_for_user.objects.filter(user_id=user_id))
+                arguments.update(expert_data=expert_sciences.objects.filter(user_id=user_id))
+                arguments.update(sciences=type_sciences.objects.all())
             except:
                 arguments.update(error='Пользователь не найден!')
             return render(request, 'prototipe/admin/user_look.html', {'arguments': arguments})
@@ -958,6 +958,12 @@ def user_manage_admin(request, user_id, query_type):
                 user_object.userprofile.patronymic = patronymic
                 user_object.username = username
                 user_object.email = email
+                if user_object.groups.all()[0].name == 'Эксперт' and user_group != 'Эксперт':
+                    try:
+                        expert_sciences_object = expert_sciences.objects.get(user_id=user_object)
+                        expert_sciences_object.delete()
+                    except:
+                        pass
                 user_object.groups.clear()
                 user_object.groups.add(Group.objects.get(name=user_group))
                 if request.user.is_staff or request.user.is_superuser:
@@ -965,7 +971,7 @@ def user_manage_admin(request, user_id, query_type):
                     user_object.is_superuser = is_superuser
                 user_object.save()
                 return redirect(f'/adm/users/{user_id}')
-        if request.method == 'POST' and query_type == 'delUser':
+        elif request.method == 'POST' and query_type == 'delUser':
             err = False
             user_search = False
             try:
@@ -982,6 +988,35 @@ def user_manage_admin(request, user_id, query_type):
                 if user_search:
                     user_object.delete()
                 return redirect(f'/adm/users')
+        elif request.method == 'POST' and query_type == 'setExpert':
+            err = False
+            user_search = False
+            args_status = False
+            sciences_name = request.POST.get('sciences_name', False)
+            if sciences_name:
+                args_status = True
+            try:
+                user_object = User.objects.get(id=user_id)
+                user_search = True
+            except:
+                arguments.update(error='Пользователь не найден!')
+                err = True
+            if err:
+                if user_search:
+                    arguments.update(user=user_object)
+                if not args_status:
+                    arguments.update(error='Наука передана некорректно!')
+                return render(request, 'prototipe/admin/user_look.html', {'arguments': arguments})
+            else:
+                if user_search:
+                    try:
+                        expert_sciences_object = expert_sciences(type_sciences_id=type_sciences.objects.get(sciences_name=sciences_name), user_id=user_object)
+                        expert_sciences_object.save()
+                        user_object.groups.clear()
+                        user_object.groups.add(Group.objects.get(name='Эксперт'))
+                    except:
+                        pass
+                    return redirect(f'/adm/users/{user_id}')
         else:
             return HttpResponse('405 Method Not Allowed', status=405)
     else:

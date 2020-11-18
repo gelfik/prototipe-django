@@ -30,7 +30,7 @@ urlpatterns = [
     re_path(r'^adm/archive/([0-9]+)', views.archive_users_list_admin),
     path('adm/archive', views.archive_admin),
 
-    re_path(r'^adm/users/([0-9]+)/(editUser|delUser)', views.user_manage_admin),
+    re_path(r'^adm/users/([0-9]+)/(editUser|delUser|setExpert)', views.user_manage_admin),
     re_path(r'^adm/users/([0-9]+)', views.user_look_admin),
     path('adm/users', views.users_list_admin),
 
